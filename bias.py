@@ -214,9 +214,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
 	#### we must extract the k values from the get_transfer list so they coincide. 
 	kget = cosmo.get_transfer(redshift[0])
-	kclasstemp = kget.get('k (h/Mpc)')
-	bound = np.where((kclasstemp > 0)&(kclasstemp < 5.366287e+00))[0]
-	kclasstemp = kclasstemp[bound]
+	#~ kclasstemp = kget.get('k (h/Mpc)')
+	#~ bound = np.where((kclasstemp > 0)&(kclasstemp < 5.366287e+00))[0]
+	#~ kclasstemp = kclasstemp[bound]
+	kclass = kget.get('k (h/Mpc)')
+	bound = np.where((kclass > 0)&(kclass < 5.366287e+00))[0]
+	kclass = kclass[bound]
 
 	####################################################################
 	#### get the index of the kmax value in the k.dot array and remove the elements out of range 
@@ -248,9 +251,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	####################################################################
 	#### get the transfer function from class
-	d_b = np.zeros((len(kclasstemp), znumber), 'float64')
-	d_cdm = np.zeros((len(kclasstemp), znumber), 'float64')
-	d_tot = np.zeros((len(kclasstemp), znumber), 'float64')
+	#~ d_b = np.zeros((len(kclasstemp), znumber), 'float64')
+	#~ d_cdm = np.zeros((len(kclasstemp), znumber), 'float64')
+	#~ d_tot = np.zeros((len(kclasstemp), znumber), 'float64')
+	d_b = np.zeros((len(kclass), znumber), 'float64')
+	d_cdm = np.zeros((len(kclass), znumber), 'float64')
+	d_tot = np.zeros((len(kclass), znumber), 'float64')
 	for i in xrange(znumber):
 		transfer = cosmo.get_transfer(redshift[i])
 		d_b[:,i] = transfer.get('d_b')[bound]
@@ -266,193 +272,149 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	####################################################################
 	#### define the CDM + baryons transfer function 
-	T_cb = np.zeros((len(kclasstemp), znumber), 'float64')
+	#~ T_cb = np.zeros((len(kclasstemp), znumber), 'float64')
+	T_cb = np.zeros((len(kclass), znumber), 'float64')
 	T_cb = (Omega_cdm * d_cdm + Omega_b * d_b)/(Omega_cdm + Omega_b)
     
     
 	####################################################################
 	#### get the non linear power spectrum from class
-	pk = np.zeros((len(kclasstemp), znumber), 'float64')
-	for ik in xrange(len(kclasstemp)):
+	#~ pk = np.zeros((len(kclasstemp), znumber), 'float64')
+	#~ for ik in xrange(len(kclasstemp)):
+		#~ for iz in xrange(znumber):
+			#~ pk[ik,iz] = cosmo.pk(kclasstemp[ik], redshift[iz])
+	pk = np.zeros((len(kclass), znumber), 'float64')
+	for ik in xrange(len(kclass)):
 		for iz in xrange(znumber):
-			pk[ik,iz] = cosmo.pk(kclasstemp[ik], redshift[iz])
+			pk[ik,iz] = cosmo.pk(kclass[ik], redshift[iz])
 
 	
 	####################################################################
 	#### get the linear power spectrum from class
-	pk_lin = np.zeros((len(kclasstemp), znumber), 'float64')
-	for ik in xrange(len(kclasstemp)):
+	#~ pk_lin = np.zeros((len(kclasstemp), znumber), 'float64')
+	#~ for ik in xrange(len(kclasstemp)):
+		#~ for iz in xrange(znumber):
+			#~ pk_lin[ik,iz] = cosmo.pk_lin(kclasstemp[ik], redshift[iz])	
+	pk_lin = np.zeros((len(kclass), znumber), 'float64')
+	for ik in xrange(len(kclass)):
 		for iz in xrange(znumber):
-			pk_lin[ik,iz] = cosmo.pk_lin(kclasstemp[ik], redshift[iz])	
+			pk_lin[ik,iz] = cosmo.pk_lin(kclass[ik], redshift[iz])	
 	
 	####################################################################
 	###### compute the one loop correction with FAST-PT for the expansion model
 
 
 	if model == 'exp':
-		# evenly logged kclass and interpolate pk_lin for fast-PT
-		kclass = np.logspace(np.min(np.log10(kclasstemp)), np.max(np.log10(kclasstemp)), 122)
-		pk_lin2 = np.zeros((len(kclass),znumber))
-		T_cb2 = np.zeros((len(kclass),znumber))
-		d_tot2 = np.zeros((len(kclass),znumber))
+		#~ kclass = np.logspace(np.min(np.log10(kclasstemp)), np.max(np.log10(kclasstemp)), 122)
+		Aprime = np.zeros((200,znumber))
+		Bprime = np.zeros((200,znumber))
+		Cprime = np.zeros((200,znumber))
+		Dprime = np.zeros((200,znumber))
+		Eprime = np.zeros((200,znumber))
+		Fprime = np.zeros((200,znumber))
+		Gprime = np.zeros((200,znumber))
+		Hprime = np.zeros((200,znumber))
+		Pmod_dd_prime = np.zeros((200,znumber))
+		Pmod_dt_prime = np.zeros((200,znumber))
+		Pmod_tt_prime = np.zeros((200,znumber))
 		
-		for iz in xrange(znumber):
-
-			# set the parameters for the power spectrum window and
-			# Fourier coefficient window 
-			C_window=.75
-
-			# interpolate on the new scale array
-			pk_lin2[:,iz] = np.interp(kclass,kclasstemp, pk_lin[:,iz])
-			T_cb2[:,iz] = np.interp(kclass,kclasstemp, T_cb[:,iz])
-			d_tot2[:,iz] = np.interp(kclass,kclasstemp, d_tot[:,iz])
-			
-			# padding length 
-			nu=-2; n_pad=len(kclass)
-			n_pad=int(0.5*len(kclass))
-			to_do=['all']
-							
-			
-			
-			# initialize the FASTPT class 
-			# including extrapolation to higher and lower k  
-			# time the operation
-			fastpt=FPT.FASTPT(kclass,to_do=to_do,n_pad=n_pad) 
-				
-			# calculate 1loop SPT (and time the operation) for density
-			P_spt_dd=fastpt.one_loop_dd(pk_lin2[:,iz],C_window=C_window)
-				
-			
-			# calculate 1loop SPT (and time the operation) for velocity
-			P_spt_tt=fastpt.one_loop_tt(pk_lin2[:,iz],C_window=C_window)
-
-				
-			# calculate 1loop SPT (and time the operation) for velocity - density
-			P_spt_dt=fastpt.one_loop_dt(pk_lin2[:,iz],C_window=C_window)
-
-				
-			#calculate tidal torque EE and BB P(k)
-			#~ P_RSD=fastpt.RSD_components(P,1.0,C_window=C_window)	
-
-			Pmod_tt = np.zeros((len(kclass),znumber))
-			# update the power spectrum
-			Pmod_dd=pk_lin2[:,iz]+P_spt_dd[0]
-			Pmod_dt=pk_lin2[:,iz]+P_spt_dt[0]
-			Pmod_tt[:,iz]=pk_lin2[:,iz]+P_spt_tt[0]
-			
-			#~ A = P_spt_dd[2]
-			#~ B = P_spt_dd[3]
-			#~ C = P_spt_dd[4]
-			#~ D = P_spt_dd[5]
-			#~ E = P_spt_dd[6]
-			#~ F = P_spt_dd[7]
-			#~ G = P_spt_dt[2]
-			#~ H = P_spt_dt[3]
-			
-			Aprime = np.zeros((200,znumber))
-			Bprime = np.zeros((200,znumber))
-			Cprime = np.zeros((200,znumber))
-			Dprime = np.zeros((200,znumber))
-			Eprime = np.zeros((200,znumber))
-			Fprime = np.zeros((200,znumber))
-			Gprime = np.zeros((200,znumber))
-			Hprime = np.zeros((200,znumber))
-			Pmod_dd_prime = np.zeros((200,znumber))
-			Pmod_dt_prime = np.zeros((200,znumber))
-			Pmod_tt_prime = np.zeros((200,znumber))
-			
-			for count,iz in enumerate(redshift):
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/A_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Aprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/B_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Bprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/C_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Cprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/D_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Dprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/E_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Eprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/F_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Fprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/G_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Gprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/H_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Hprime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/Pmod_dd_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Pmod_dd_prime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Pmod_dt_prime[:,count] = f[:,1]
-				#------------------------
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				kpt = f[:,0]
-				Pmod_tt_prime[:,count] = f[:,1]
+		for count,iz in enumerate(redshift):
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/A_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Aprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/B_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Bprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/C_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Cprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/D_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Dprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/E_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Eprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/F_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Fprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/G_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Gprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/H_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Hprime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/Pmod_dd_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Pmod_dd_prime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Pmod_dt_prime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+			'eV/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Pmod_tt_prime[:,count] = f[:,1]
+		
+		
+		### interpolate the pt coeff on the chosen scale
+		A = np.zeros((len(kclass),znumber))
+		B = np.zeros((len(kclass),znumber))
+		C = np.zeros((len(kclass),znumber))
+		D = np.zeros((len(kclass),znumber))
+		E = np.zeros((len(kclass),znumber))
+		F = np.zeros((len(kclass),znumber))
+		G = np.zeros((len(kclass),znumber))
+		H = np.zeros((len(kclass),znumber))
+		Pmod_dd = np.zeros((len(kclass),znumber))
+		Pmod_dt = np.zeros((len(kclass),znumber))
+		Pmod_tt = np.zeros((len(kclass),znumber))
+		for i in xrange(znumber):
+			A[:,i] = np.interp(kclass, kpt, Aprime[:,i]) 
+			B[:,i] = np.interp(kclass, kpt, Bprime[:,i]) 
+			C[:,i] = np.interp(kclass, kpt, Cprime[:,i]) 
+			D[:,i] = np.interp(kclass, kpt, Dprime[:,i]) 
+			E[:,i] = np.interp(kclass, kpt, Eprime[:,i]) 
+			F[:,i] = np.interp(kclass, kpt, Fprime[:,i]) 
+			G[:,i] = np.interp(kclass, kpt, Gprime[:,i]) 
+			H[:,i] = np.interp(kclass, kpt, Hprime[:,i]) 
+			Pmod_dd[:,i] = np.interp(kclass, kpt, Pmod_dd_prime[:,i]) 
+			Pmod_dt[:,i] = np.interp(kclass, kpt, Pmod_dt_prime[:,i]) 
+			Pmod_tt[:,i] = np.interp(kclass, kpt, Pmod_tt_prime[:,i]) 
 			
 			
-			### interpolate the pt coeff on the chosen scale
-			A = np.zeros((len(kclass),znumber))
-			B = np.zeros((len(kclass),znumber))
-			C = np.zeros((len(kclass),znumber))
-			D = np.zeros((len(kclass),znumber))
-			E = np.zeros((len(kclass),znumber))
-			F = np.zeros((len(kclass),znumber))
-			G = np.zeros((len(kclass),znumber))
-			H = np.zeros((len(kclass),znumber))
-			Pmod_dd = np.zeros((len(kclass),znumber))
-			Pmod_dt = np.zeros((len(kclass),znumber))
-			Pmod_tt = np.zeros((len(kclass),znumber))
-			for i in xrange(znumber):
-				A[:,i] = np.interp(kclass, kpt, Aprime[:,i]) 
-				B[:,i] = np.interp(kclass, kpt, Bprime[:,i]) 
-				C[:,i] = np.interp(kclass, kpt, Cprime[:,i]) 
-				D[:,i] = np.interp(kclass, kpt, Dprime[:,i]) 
-				E[:,i] = np.interp(kclass, kpt, Eprime[:,i]) 
-				F[:,i] = np.interp(kclass, kpt, Fprime[:,i]) 
-				G[:,i] = np.interp(kclass, kpt, Gprime[:,i]) 
-				H[:,i] = np.interp(kclass, kpt, Hprime[:,i]) 
-				Pmod_dd[:,i] = np.interp(kclass, kpt, Pmod_dd_prime[:,i]) 
-				Pmod_dt[:,i] = np.interp(kclass, kpt, Pmod_dt_prime[:,i]) 
-				Pmod_tt[:,i] = np.interp(kclass, kpt, Pmod_tt_prime[:,i]) 
+			
+			
+			
 			#first mass range
 			#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
 			#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
@@ -484,18 +446,21 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
 			
 			
-			# compute the halo power spectrum given the coefficient
-			PhhDD = np.zeros((len(kclass),znumber,len(Massbins)))
-			PhhDT = np.zeros((len(kclass),znumber,len(Massbins)))
-			for iz in xrange(znumber):
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					# density spectrum
-					PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
-					b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
-					2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb2[:,iz]/d_tot2[:,iz])**2
-					# cross velocity spectrum
-					PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
+		# compute the halo power spectrum given the coefficient
+		PhhDD = np.zeros((len(kclass),znumber,len(Massbins)))
+		PhhDT = np.zeros((len(kclass),znumber,len(Massbins)))
+		for iz in xrange(znumber):
+			for count,j in enumerate(Massbins):
+				ind2 = mbins.index(j)
+				# density spectrum
+				#~ PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
+				#~ b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
+				#~ 2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb2[:,iz]/d_tot2[:,iz])**2
+				PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
+				b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
+				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb[:,iz]/d_tot[:,iz])**2
+				# cross velocity spectrum
+				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
 					
 		
 		
