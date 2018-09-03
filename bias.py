@@ -421,6 +421,10 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				B[:,i] = np.interp(kclass, kpt, Bprime[:,i]) 
 				C[:,i] = np.interp(kclass, kpt, Cprime[:,i]) 
 				D[:,i] = np.interp(kclass, kpt, Dprime[:,i]) 
+				E[:,i] = np.interp(kclass, kpt, Eprime[:,i]) 
+				F[:,i] = np.interp(kclass, kpt, Fprime[:,i]) 
+				G[:,i] = np.interp(kclass, kpt, Gprime[:,i]) 
+				H[:,i] = np.interp(kclass, kpt, Hprime[:,i]) 
 			#first mass range
 			#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
 			#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
