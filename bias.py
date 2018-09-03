@@ -214,9 +214,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
 	#### we must extract the k values from the get_transfer list so they coincide. 
 	kget = cosmo.get_transfer(redshift[0])
-	#~ kclasstemp = kget.get('k (h/Mpc)')
-	#~ bound = np.where((kclasstemp > 0)&(kclasstemp < 5.366287e+00))[0]
-	#~ kclasstemp = kclasstemp[bound]
 	kclass = kget.get('k (h/Mpc)')
 	bound = np.where((kclass > 0)&(kclass < 5.366287e+00))[0]
 	kclass = kclass[bound]
@@ -251,9 +248,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	####################################################################
 	#### get the transfer function from class
-	#~ d_b = np.zeros((len(kclasstemp), znumber), 'float64')
-	#~ d_cdm = np.zeros((len(kclasstemp), znumber), 'float64')
-	#~ d_tot = np.zeros((len(kclasstemp), znumber), 'float64')
 	d_b = np.zeros((len(kclass), znumber), 'float64')
 	d_cdm = np.zeros((len(kclass), znumber), 'float64')
 	d_tot = np.zeros((len(kclass), znumber), 'float64')
@@ -272,17 +266,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	####################################################################
 	#### define the CDM + baryons transfer function 
-	#~ T_cb = np.zeros((len(kclasstemp), znumber), 'float64')
 	T_cb = np.zeros((len(kclass), znumber), 'float64')
 	T_cb = (Omega_cdm * d_cdm + Omega_b * d_b)/(Omega_cdm + Omega_b)
     
     
 	####################################################################
 	#### get the non linear power spectrum from class
-	#~ pk = np.zeros((len(kclasstemp), znumber), 'float64')
-	#~ for ik in xrange(len(kclasstemp)):
-		#~ for iz in xrange(znumber):
-			#~ pk[ik,iz] = cosmo.pk(kclasstemp[ik], redshift[iz])
 	pk = np.zeros((len(kclass), znumber), 'float64')
 	for ik in xrange(len(kclass)):
 		for iz in xrange(znumber):
@@ -291,10 +280,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	
 	####################################################################
 	#### get the linear power spectrum from class
-	#~ pk_lin = np.zeros((len(kclasstemp), znumber), 'float64')
-	#~ for ik in xrange(len(kclasstemp)):
-		#~ for iz in xrange(znumber):
-			#~ pk_lin[ik,iz] = cosmo.pk_lin(kclasstemp[ik], redshift[iz])	
 	pk_lin = np.zeros((len(kclass), znumber), 'float64')
 	for ik in xrange(len(kclass)):
 		for iz in xrange(znumber):
@@ -453,9 +438,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			for count,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
 				# density spectrum
-				#~ PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
-				#~ b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
-				#~ 2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb2[:,iz]/d_tot2[:,iz])**2
 				PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
 				b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
 				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb[:,iz]/d_tot[:,iz])**2
