@@ -464,10 +464,10 @@ def Halo(self, cosmo, data, model, case, Massbins):
 					ind2 = mbins.index(j)
 					# density spectrum
 					PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
-					b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D + 1/4.*bs[iz,count]**2*E +\
-					2*b1[iz,count]*b3nl[iz,count]*F * (T_cb2[:,iz]/d_tot2[:,iz])**2
+					b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
+					2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb2[:,iz]/d_tot2[:,iz])**2
 					# cross velocity spectrum
-					PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt + b2[iz,count]*G + bs[iz,count]*H + b3nl[iz,count] * F
+					PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
 					
 		
 		
