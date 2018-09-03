@@ -357,6 +357,10 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			Fprime = np.zeros((200,znumber))
 			Gprime = np.zeros((200,znumber))
 			Hprime = np.zeros((200,znumber))
+			Pmod_dd_prime = np.zeros((200,znumber))
+			Pmod_dt_prime = np.zeros((200,znumber))
+			Pmod_tt_prime = np.zeros((200,znumber))
+			
 			for count,iz in enumerate(redshift):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
 				'eV/PT_coeff/A_'+str(iz)+'.txt')
@@ -405,6 +409,24 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				f = np.loadtxt(dat_file_path)
 				kpt = f[:,0]
 				Hprime[:,count] = f[:,1]
+				#------------------------
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+				'eV/PT_coeff/Pmod_dd_'+str(iz)+'.txt')
+				f = np.loadtxt(dat_file_path)
+				kpt = f[:,0]
+				Pmod_dd_prime[:,count] = f[:,1]
+				#------------------------
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+				'eV/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
+				f = np.loadtxt(dat_file_path)
+				kpt = f[:,0]
+				Pmod_dt_prime[:,count] = f[:,1]
+				#------------------------
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
+				'eV/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
+				f = np.loadtxt(dat_file_path)
+				kpt = f[:,0]
+				Pmod_tt_prime[:,count] = f[:,1]
 			
 			
 			### interpolate the pt coeff on the chosen scale
@@ -416,6 +438,9 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			F = np.zeros((len(kclass),znumber))
 			G = np.zeros((len(kclass),znumber))
 			H = np.zeros((len(kclass),znumber))
+			Pmod_dd = np.zeros((len(kclass),znumber))
+			Pmod_dt = np.zeros((len(kclass),znumber))
+			Pmod_tt = np.zeros((len(kclass),znumber))
 			for i in xrange(znumber):
 				A[:,i] = np.interp(kclass, kpt, Aprime[:,i]) 
 				B[:,i] = np.interp(kclass, kpt, Bprime[:,i]) 
@@ -425,6 +450,9 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				F[:,i] = np.interp(kclass, kpt, Fprime[:,i]) 
 				G[:,i] = np.interp(kclass, kpt, Gprime[:,i]) 
 				H[:,i] = np.interp(kclass, kpt, Hprime[:,i]) 
+				Pmod_dd[:,i] = np.interp(kclass, kpt, Pmod_dd_prime[:,i]) 
+				Pmod_dt[:,i] = np.interp(kclass, kpt, Pmod_dt_prime[:,i]) 
+				Pmod_tt[:,i] = np.interp(kclass, kpt, Pmod_tt_prime[:,i]) 
 			#first mass range
 			#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
 			#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
@@ -463,11 +491,11 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				for count,j in enumerate(Massbins):
 					ind2 = mbins.index(j)
 					# density spectrum
-					PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
+					PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
 					b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
 					2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb2[:,iz]/d_tot2[:,iz])**2
 					# cross velocity spectrum
-					PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
+					PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
 					
 		
 		
