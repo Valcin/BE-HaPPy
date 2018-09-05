@@ -400,37 +400,42 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			
 			
 			
-			#first mass range
-			#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
-			#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
-			#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
-			#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
-			#~ k = d1[:,19]
-			#~ Phh1 = np.zeros((len(k),10))
-			#~ Phh2 = np.zeros((len(k),10))
-			#~ Phh3 = np.zeros((len(k),10))
-			#~ Phh4 = np.zeros((len(k),10))
-			#~ Pshot1 = np.zeros((10))
-			#~ Pshot2 = np.zeros((10))
-			#~ Pshot3 = np.zeros((10))
-			#~ Pshot4 = np.zeros((10))
-			#~ pnum1 = [0,2,4,6,8,10,12,14,16,18]
-			#~ pnum2 = [1,3,5,7,9,11,13,15,17,20]
-			#~ for i in xrange(0,10):
-				#~ Phh1[:,i]= d1[:,pnum1[i]]
-				#~ Phh2[:,i]= d2[:,pnum1[i]]
-				#~ Phh3[:,i]= d3[:,pnum1[i]]
-				#~ Phh4[:,i]= d4[:,pnum1[i]]
-				#~ Pshot1[i]= d1[0,pnum2[i]]
-				#~ Pshot2[i]= d2[0,pnum2[i]]
-				#~ Pshot3[i]= d3[0,pnum2[i]]
-				#~ Pshot4[i]= d4[0,pnum2[i]]
-				#~ Phh1[:,i] = Phh1[:,i]-Pshot1[i]
-				#~ Phh2[:,i] = Phh2[:,i]-Pshot2[i]
-				#~ Phh3[:,i] = Phh3[:,i]-Pshot3[i]
-				#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
+		#first mass range
+		d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
+		d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
+		d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
+		d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
+		k = d1[:,19]
+		Phh1 = np.zeros((len(k),10))
+		Phh2 = np.zeros((len(k),10))
+		Phh3 = np.zeros((len(k),10))
+		Phh4 = np.zeros((len(k),10))
+		Pshot1 = np.zeros((10))
+		Pshot2 = np.zeros((10))
+		Pshot3 = np.zeros((10))
+		Pshot4 = np.zeros((10))
+		pnum1 = [0,2,4,6,8,10,12,14,16,18]
+		pnum2 = [1,3,5,7,9,11,13,15,17,20]
+		for i in xrange(0,10):
+			Phh1[:,i]= d1[:,pnum1[i]]
+			Phh2[:,i]= d2[:,pnum1[i]]
+			Phh3[:,i]= d3[:,pnum1[i]]
+			Phh4[:,i]= d4[:,pnum1[i]]
+			Pshot1[i]= d1[0,pnum2[i]]
+			Pshot2[i]= d2[0,pnum2[i]]
+			Pshot3[i]= d3[0,pnum2[i]]
+			Pshot4[i]= d4[0,pnum2[i]]
+			Phh1[:,i] = Phh1[:,i]-Pshot1[i]
+			Phh2[:,i] = Phh2[:,i]-Pshot2[i]
+			Phh3[:,i] = Phh3[:,i]-Pshot3[i]
+			Phh4[:,i] = Phh4[:,i]-Pshot4[i]
 			
-			
+		PH1 = np.mean(Phh1[:,0:11], axis=1)
+		PH2 = np.mean(Phh2[:,0:11], axis=1)
+		PH3 = np.mean(Phh3[:,0:11], axis=1)
+		PH4 = np.mean(Phh4[:,0:11], axis=1)
+		
+		
 		# compute the halo power spectrum given the coefficient
 		PhhDD = np.zeros((len(kclass),znumber,len(Massbins)))
 		PhhDT = np.zeros((len(kclass),znumber,len(Massbins)))
@@ -497,8 +502,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		PhhDT = PhhDT[lim_l[0]:klim_h+1]
 		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
 
-		#~ print np.max(kclasstemp)
-		return kclass,PhhDD, PhhDT, Pmod_tt
+		return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
+		#~ return kclass,PhhDD, PhhDT, Pmod_tt
 		
 		
 	####################################################################
@@ -506,22 +511,22 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 
 	if model == 'pl':
-		bcc = np.zeros((len(kclasstemp), znumber, len(Massbins)), 'float64')
+		bcc = np.zeros((len(kclass), znumber, len(Massbins)), 'float64')
 		for iz in xrange(znumber):
 			for count,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
-				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclasstemp**2) + b3[iz,count]*(kclasstemp**3) \
-				+ b4[iz,count]*(kclasstemp**4) 
+				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclass**2) + b3[iz,count]*(kclass**3) \
+				+ b4[iz,count]*(kclass**4) 
 				
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
-		bmm = np.zeros((len(kclasstemp), znumber, len(Massbins)), 'float64')
+		bmm = np.zeros((len(kclass), znumber, len(Massbins)), 'float64')
 		for iz in xrange(znumber):
 			for count,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
 				bmm[:,iz, count] = bcc[:,iz,count] * (T_cb[:,iz]/d_tot[:,iz])# * (bcc_LS0[iz]/denom[iz])
 
 		# Compute the halo Power spectrum in real space
-		Phh = np.zeros((len(kclasstemp), znumber, len(Massbins)), 'float64')
+		Phh = np.zeros((len(kclass), znumber, len(Massbins)), 'float64')
 		for iz in xrange(znumber):
 			for count,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
@@ -529,7 +534,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			
 			
 		# rescale the k and power spectrum because of classy/class difference
-		kclasstemp /= h
+		kclass /= h
 		Phh *= h**3
 		
 		# create a scale array limited by kmin and kmax
@@ -538,9 +543,9 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		except:
 			self.kmax = False
 		if self.kmax:
-			lim_h = np.where(kclasstemp <= self.kmax)[0]
+			lim_h = np.where(kclass <= self.kmax)[0]
 		else:
-			lim_h = np.where(kclasstemp <= kmax)[0]
+			lim_h = np.where(kclass <= kmax)[0]
 
 		klim_h = np.amax(lim_h) # define the higher limit
 		
@@ -554,23 +559,56 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			self.kmin = False
 
 		if self.kmin:
-			lim_l = np.where(kclasstemp >= self.kmin)[0]
+			lim_l = np.where(kclass >= self.kmin)[0]
 		else:
-			lim_l = np.where(kclasstemp >= kmin)[0]
+			lim_l = np.where(kclass >= kmin)[0]
 		#------------------------------------------------------------------
 		##### =====> 
-		kclasstemp = kclasstemp[lim_l[0]:klim_h+1]
+		kclass = kclass[lim_l[0]:klim_h+1]
 		Phh = Phh[lim_l[0]:klim_h+1]
 		
-		return kclasstemp, Phh
+		#first mass range
+		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
+		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
+		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
+		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
+		#~ k = d1[:,19]
+		#~ Phh1 = np.zeros((len(k),10))
+		#~ Phh2 = np.zeros((len(k),10))
+		#~ Phh3 = np.zeros((len(k),10))
+		#~ Phh4 = np.zeros((len(k),10))
+		#~ Pshot1 = np.zeros((10))
+		#~ Pshot2 = np.zeros((10))
+		#~ Pshot3 = np.zeros((10))
+		#~ Pshot4 = np.zeros((10))
+		#~ pnum1 = [0,2,4,6,8,10,12,14,16,18]
+		#~ pnum2 = [1,3,5,7,9,11,13,15,17,20]
+		#~ for i in xrange(0,10):
+			#~ Phh1[:,i]= d1[:,pnum1[i]]
+			#~ Phh2[:,i]= d2[:,pnum1[i]]
+			#~ Phh3[:,i]= d3[:,pnum1[i]]
+			#~ Phh4[:,i]= d4[:,pnum1[i]]
+			#~ Pshot1[i]= d1[0,pnum2[i]]
+			#~ Pshot2[i]= d2[0,pnum2[i]]
+			#~ Pshot3[i]= d3[0,pnum2[i]]
+			#~ Pshot4[i]= d4[0,pnum2[i]]
+			#~ Phh1[:,i] = Phh1[:,i]-Pshot1[i]
+			#~ Phh2[:,i] = Phh2[:,i]-Pshot2[i]
+			#~ Phh3[:,i] = Phh3[:,i]-Pshot3[i]
+			#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
+			
+		#~ PH1 = np.mean(Phh1[:,0:11], axis=1)
+		#~ PH2 = np.mean(Phh2[:,0:11], axis=1)
+		#~ PH3 = np.mean(Phh3[:,0:11], axis=1)
+		#~ PH4 = np.mean(Phh4[:,0:11], axis=1)
+		
+		#~ return kclass, Phh, k, PH1, PH2, PH3, PH4
+		
+		
+		return kclass, Phh
 		
 
 
-	
-
-	
-
-	
 
 
 
