@@ -1,5 +1,6 @@
 # BE-HaPPy
-Bias Emulator for Halo Power Spectrum 
+Bias Emulator for Halo Power Spectrum is a software designed to falicitate future large scale surveys analysis by providing an accurate, easy to use and computionally inexpensive method to compute the halo bias.
+
 
 
 
