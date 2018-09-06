@@ -43,9 +43,9 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	m = cosmo.get_current_derived_parameters(['m_ncdm_tot'])
 	m = m.values()
 	m = [ round(elem, 2) for elem in m ]
-	mv = [0.0, 0.06, 0.10,0.15]
+	mv = [0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30]
 	if m[0] not in mv:
-		raise ValueError('Sorry the code is only available for Mv = 0.0,0.06,0.10,0.15 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
+		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
 
 	####################################################################
 	#### import the requested redshift(s) 
@@ -291,17 +291,17 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	if model == 'exp':
 		#~ kclass = np.logspace(np.min(np.log10(kclasstemp)), np.max(np.log10(kclasstemp)), 122)
-		Aprime = np.zeros((200,znumber))
-		Bprime = np.zeros((200,znumber))
-		Cprime = np.zeros((200,znumber))
-		Dprime = np.zeros((200,znumber))
-		Eprime = np.zeros((200,znumber))
-		Fprime = np.zeros((200,znumber))
-		Gprime = np.zeros((200,znumber))
-		Hprime = np.zeros((200,znumber))
-		Pmod_dd_prime = np.zeros((200,znumber))
-		Pmod_dt_prime = np.zeros((200,znumber))
-		Pmod_tt_prime = np.zeros((200,znumber))
+		Aprime = np.zeros((350,znumber))
+		Bprime = np.zeros((350,znumber))
+		Cprime = np.zeros((350,znumber))
+		Dprime = np.zeros((350,znumber))
+		Eprime = np.zeros((350,znumber))
+		Fprime = np.zeros((350,znumber))
+		Gprime = np.zeros((350,znumber))
+		Hprime = np.zeros((350,znumber))
+		Pmod_dd_prime = np.zeros((350,znumber))
+		Pmod_dt_prime = np.zeros((350,znumber))
+		Pmod_tt_prime = np.zeros((350,znumber))
 		
 		for count,iz in enumerate(redshift):
 			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
@@ -449,26 +449,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				# cross velocity spectrum
 				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
 					
-		
-		
-		# rescale the k and power spectrum because of classy/class difference (explain this power of k ?)
-		kclass /= h
-		# For z == 0.0:
-		PhhDD[:,0,:] /= h**(3/2.)
-		PhhDT[:,0,:] /= h**(3/2.)
-		Pmod_tt[:,0] /= h**(3/2.)
-		# For z == 0.5:
-		PhhDD[:,1,:] /= 1.
-		PhhDT[:,1,:] /= 1.
-		Pmod_tt[:,1] /= 1.
-		# For z == 1.0:
-		PhhDD[:,2,:] *= h
-		PhhDT[:,2,:] *= h
-		Pmod_tt[:,2] *= h
-		# For z == 2.0:
-		PhhDD[:,3,:] *= h**3
-		PhhDT[:,3] *= h**3
-		#~ Pmod_tt[:,3,:] *= h**3
 
 		# create a scale array limited by kmin and kmax
 		try:
