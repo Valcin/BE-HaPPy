@@ -108,7 +108,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		if case == 1:
 			for i in red2:
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
-				'/case1/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
+				'/case1/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -121,7 +121,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		if case == 2:
 			for i in red2:
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
+				'/case2/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -134,7 +134,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		if case == 3:
 			for i in red2:
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
+				'/case2/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -157,7 +157,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		if case == 1:
 			for i in red2:
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
-				'/case1/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
+				'/case1/coeff_pl_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -170,7 +170,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		if case == 2:
 			for i in red2:
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
+				'/case2/coeff_pl_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -183,7 +183,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		if case == 3:
 			for i in red2:
 				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
+				'/case2/coeff_pl_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -277,7 +277,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS030[ind,count] = f[ind2]
 
-	print bcc_LS000
+	
 	#~ bcc_LS000 = np.interp(redshift, red2, bls000)
 	#~ bcc_LS003 = np.interp(redshift, red2, bls003)
 	#~ bcc_LS006 = np.interp(redshift, red2, bls006)
