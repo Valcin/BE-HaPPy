@@ -218,40 +218,64 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			bcc_LS000[ind,count] = f[ind2]
 	#------------------------------
 	bcc_LS003 = np.zeros((len(red2),len(Massbins)))
-	for count,i in enumerate(redshift):
+	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.03/'\
 		'LS_z='+str(i)+'_.txt')
-		bcc_LS003[count,:] = np.loadtxt(dat_file_path)
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS003[ind,count] = f[ind2]
 	#------------------------------
 	bcc_LS006 = np.zeros((len(red2),len(Massbins)))
-	for count,i in enumerate(redshift):
+	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.06/'\
 		'LS_z='+str(i)+'_.txt')
-		bcc_LS006[count,:] = np.loadtxt(dat_file_path)
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS006[ind,count] = f[ind2]
 	#------------------------------
 	bcc_LS010 = np.zeros((len(red2),len(Massbins)))
-	for count,i in enumerate(redshift):
+	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
 		'LS_z='+str(i)+'_.txt')
-		bcc_LS010[count,:] = np.loadtxt(dat_file_path)
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS010[ind,count] = f[ind2]
 	#------------------------------
 	bcc_LS013 = np.zeros((len(red2),len(Massbins)))
-	for count,i in enumerate(redshift):
+	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.13/'\
 		'LS_z='+str(i)+'_.txt')
-		bcc_LS013[count,:] = np.loadtxt(dat_file_path)
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS013[ind,count] = f[ind2]
 	#------------------------------
 	bcc_LS015 = np.zeros((len(red2),len(Massbins)))
-	for count,i in enumerate(redshift):
+	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.15eV/large_scale/'\
 		'LS_z='+str(i)+'_.txt')
-		bcc_LS015[count,:] = np.loadtxt(dat_file_path)
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS015[ind,count] = f[ind2]
 	#------------------------------
 	bcc_LS030 = np.zeros((len(red2),len(Massbins)))
-	for count,i in enumerate(redshift):
+	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
 		'LS_z='+str(i)+'_.txt')
-		bcc_LS030[count,:] = np.loadtxt(dat_file_path)
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS030[ind,count] = f[ind2]
 
 	print bcc_LS000
 	#~ bcc_LS000 = np.interp(redshift, red2, bls000)
