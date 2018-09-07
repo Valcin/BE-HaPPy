@@ -9,10 +9,28 @@ import numpy as np
 import warnings
 import csv
 import sys
-sys.path.append('/home/david/codes/FAST-PT')
-import myFASTPT as FPT
 
 
+############################## INPUT ###################################
+# neutrino parameters
+#hierarchy = 'degenerate' #'degenerate', 'normal', 'inverted'
+#Mnu       = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30  #eV
+#Nnu       = 0, 3 #number of massive neutrinos
+#Neff      = 3.046
+
+# cosmological parameters
+#h       = 0.6711
+#Omega_c = 0.2685 - Mnu/(93.14*h**2)
+#Omega_b = 0.049
+#Omega_k = 0.0
+#tau     = None
+
+# initial P(k) parameters
+#ns           = 0.9624
+#As           = 2.13e-9
+#pivot_scalar = 0.05
+#pivot_tensor = 0.05
+########################################################################
 
 def Halo(self, cosmo, data, model, case, Massbins):
 
@@ -96,7 +114,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#### get the coefficients from the dat files in the data directory 
 	#### get the large scale amplitude of bcc at different z and for different neutrino masses
 	self.data_directory = data.path['root']
-	print self.data.directory
 
 	#-------------------------------------------------------------------
 	if model =='exp':
@@ -108,7 +125,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 1:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, '/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 				'/case1/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -121,7 +138,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 2:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 				'/case2/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -134,7 +151,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 3:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 				'/case2/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -157,7 +174,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 1:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 				'/case1/coeff_pl_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -170,7 +187,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 2:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 				'/case2/coeff_pl_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -183,7 +200,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 3:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 				'/case2/coeff_pl_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -210,7 +227,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#### get the rescaling coefficients according to neutrino mass
 	bcc_LS000 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV/large_scale/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV/large_scale/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -220,7 +237,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#------------------------------
 	bcc_LS003 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.03/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.03/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -230,7 +247,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#------------------------------
 	bcc_LS006 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.06/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.06/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -240,7 +257,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#------------------------------
 	bcc_LS010 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -250,7 +267,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#------------------------------
 	bcc_LS013 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.13/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.13/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -260,7 +277,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#------------------------------
 	bcc_LS015 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.15eV/large_scale/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.15eV/large_scale/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -270,7 +287,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#------------------------------
 	bcc_LS030 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -382,67 +399,67 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		Pmod_tt_prime = np.zeros((350,znumber))
 		
 		for count,iz in enumerate(redshift):
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/A_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Aprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/B_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Bprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/C_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Cprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/D_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Dprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/E_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Eprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/F_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Fprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/G_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Gprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/H_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Hprime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/Pmod_dd_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Pmod_dd_prime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Pmod_dt_prime[:,count] = f[:,1]
 			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
