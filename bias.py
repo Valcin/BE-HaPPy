@@ -107,8 +107,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 1:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/case1/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				'/case1/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -120,8 +120,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 2:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/case2/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				'/case2/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -133,8 +133,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 3:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/case2/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				'/case2/coeff_3exp_'+str(m[0])+'_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -156,8 +156,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 1:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/case1/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				'/case1/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -169,8 +169,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 2:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/case2/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				'/case2/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -182,8 +182,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 		if case == 3:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/'+str(m[0])+\
-				'eV/case2/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
+				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				'/case2/coeff_pl_'+str(m[0])+'_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
 				for count,j in enumerate(Massbins):
@@ -204,10 +204,63 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#~ b3_interp = np.interp(redshift, red1, b3, right=UNDEF)
 	#~ b4_interp = np.interp(redshift, red1, b4, right=UNDEF)
 
-	#~ bcc_LS0 = np.interp(redshift, red2, bls0)
+
+	####################################################################
+	#### get the rescaling coefficients according to neutrino mass
+	bcc_LS000 = np.zeros((len(red2),len(Massbins)))
+	for i in red2:
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV/large_scale/'\
+		'LS_z='+str(i)+'_.txt')
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS000[ind,count] = f[ind2]
+	#------------------------------
+	bcc_LS003 = np.zeros((len(red2),len(Massbins)))
+	for count,i in enumerate(redshift):
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.03/'\
+		'LS_z='+str(i)+'_.txt')
+		bcc_LS003[count,:] = np.loadtxt(dat_file_path)
+	#------------------------------
+	bcc_LS006 = np.zeros((len(red2),len(Massbins)))
+	for count,i in enumerate(redshift):
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.06/'\
+		'LS_z='+str(i)+'_.txt')
+		bcc_LS006[count,:] = np.loadtxt(dat_file_path)
+	#------------------------------
+	bcc_LS010 = np.zeros((len(red2),len(Massbins)))
+	for count,i in enumerate(redshift):
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
+		'LS_z='+str(i)+'_.txt')
+		bcc_LS010[count,:] = np.loadtxt(dat_file_path)
+	#------------------------------
+	bcc_LS013 = np.zeros((len(red2),len(Massbins)))
+	for count,i in enumerate(redshift):
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.13/'\
+		'LS_z='+str(i)+'_.txt')
+		bcc_LS013[count,:] = np.loadtxt(dat_file_path)
+	#------------------------------
+	bcc_LS015 = np.zeros((len(red2),len(Massbins)))
+	for count,i in enumerate(redshift):
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.15eV/large_scale/'\
+		'LS_z='+str(i)+'_.txt')
+		bcc_LS015[count,:] = np.loadtxt(dat_file_path)
+	#------------------------------
+	bcc_LS030 = np.zeros((len(red2),len(Massbins)))
+	for count,i in enumerate(redshift):
+		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
+		'LS_z='+str(i)+'_.txt')
+		bcc_LS030[count,:] = np.loadtxt(dat_file_path)
+
+	print bcc_LS000
+	#~ bcc_LS000 = np.interp(redshift, red2, bls000)
+	#~ bcc_LS003 = np.interp(redshift, red2, bls003)
 	#~ bcc_LS006 = np.interp(redshift, red2, bls006)
 	#~ bcc_LS010 = np.interp(redshift, red2, bls010)
+	#~ bcc_LS013 = np.interp(redshift, red2, bls013)
 	#~ bcc_LS015 = np.interp(redshift, red2, bls015)
+	#~ bcc_LS030 = np.interp(redshift, red2, bls030)
 
 	
 	####################################################################
@@ -400,40 +453,40 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			
 			
 			
-		#first mass range
-		d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
-		d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
-		d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
-		d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
-		k = d1[:,19]
-		Phh1 = np.zeros((len(k),10))
-		Phh2 = np.zeros((len(k),10))
-		Phh3 = np.zeros((len(k),10))
-		Phh4 = np.zeros((len(k),10))
-		Pshot1 = np.zeros((10))
-		Pshot2 = np.zeros((10))
-		Pshot3 = np.zeros((10))
-		Pshot4 = np.zeros((10))
-		pnum1 = [0,2,4,6,8,10,12,14,16,18]
-		pnum2 = [1,3,5,7,9,11,13,15,17,20]
-		for i in xrange(0,10):
-			Phh1[:,i]= d1[:,pnum1[i]]
-			Phh2[:,i]= d2[:,pnum1[i]]
-			Phh3[:,i]= d3[:,pnum1[i]]
-			Phh4[:,i]= d4[:,pnum1[i]]
-			Pshot1[i]= d1[0,pnum2[i]]
-			Pshot2[i]= d2[0,pnum2[i]]
-			Pshot3[i]= d3[0,pnum2[i]]
-			Pshot4[i]= d4[0,pnum2[i]]
-			Phh1[:,i] = Phh1[:,i]-Pshot1[i]
-			Phh2[:,i] = Phh2[:,i]-Pshot2[i]
-			Phh3[:,i] = Phh3[:,i]-Pshot3[i]
-			Phh4[:,i] = Phh4[:,i]-Pshot4[i]
+		#~ #first mass range
+		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
+		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
+		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
+		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
+		#~ k = d1[:,19]
+		#~ Phh1 = np.zeros((len(k),10))
+		#~ Phh2 = np.zeros((len(k),10))
+		#~ Phh3 = np.zeros((len(k),10))
+		#~ Phh4 = np.zeros((len(k),10))
+		#~ Pshot1 = np.zeros((10))
+		#~ Pshot2 = np.zeros((10))
+		#~ Pshot3 = np.zeros((10))
+		#~ Pshot4 = np.zeros((10))
+		#~ pnum1 = [0,2,4,6,8,10,12,14,16,18]
+		#~ pnum2 = [1,3,5,7,9,11,13,15,17,20]
+		#~ for i in xrange(0,10):
+			#~ Phh1[:,i]= d1[:,pnum1[i]]
+			#~ Phh2[:,i]= d2[:,pnum1[i]]
+			#~ Phh3[:,i]= d3[:,pnum1[i]]
+			#~ Phh4[:,i]= d4[:,pnum1[i]]
+			#~ Pshot1[i]= d1[0,pnum2[i]]
+			#~ Pshot2[i]= d2[0,pnum2[i]]
+			#~ Pshot3[i]= d3[0,pnum2[i]]
+			#~ Pshot4[i]= d4[0,pnum2[i]]
+			#~ Phh1[:,i] = Phh1[:,i]-Pshot1[i]
+			#~ Phh2[:,i] = Phh2[:,i]-Pshot2[i]
+			#~ Phh3[:,i] = Phh3[:,i]-Pshot3[i]
+			#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
 			
-		PH1 = np.mean(Phh1[:,0:11], axis=1)
-		PH2 = np.mean(Phh2[:,0:11], axis=1)
-		PH3 = np.mean(Phh3[:,0:11], axis=1)
-		PH4 = np.mean(Phh4[:,0:11], axis=1)
+		#~ PH1 = np.mean(Phh1[:,0:11], axis=1)
+		#~ PH2 = np.mean(Phh2[:,0:11], axis=1)
+		#~ PH3 = np.mean(Phh3[:,0:11], axis=1)
+		#~ PH4 = np.mean(Phh4[:,0:11], axis=1)
 		
 		
 		# compute the halo power spectrum given the coefficient
@@ -482,8 +535,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		PhhDT = PhhDT[lim_l[0]:klim_h+1]
 		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
 
-		return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
-		#~ return kclass,PhhDD, PhhDT, Pmod_tt
+		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
+		return kclass,PhhDD, PhhDT, Pmod_tt
 		
 		
 	####################################################################
@@ -497,6 +550,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				ind2 = mbins.index(j)
 				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclass**2) + b3[iz,count]*(kclass**3) \
 				+ b4[iz,count]*(kclass**4) 
+				
+		if m[0] == 0.15:
+			print 'popo'
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz, count] *= bcc_LS015[iz,count]
 				
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
 		bmm = np.zeros((len(kclass), znumber, len(Massbins)), 'float64')
