@@ -37,7 +37,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		raise ValueError('You must declare a z_max_pk for the computation of the transfer functions')
 
 	####################################################################
-	#### For now the simulations available are for Mv=0,0.06,0.10,0.15 
 	#### Check if the total neutrino mass corresponds to one of the available ones
 	#### get_current_derived_parameters returns a dict so must be converted
 	m = cosmo.get_current_derived_parameters(['m_ncdm_tot'])
@@ -67,6 +66,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#--------------------------------------------
 	if not len(self.z)>0 and not self.redshift:
 		raise ValueError('Please define redshift(s) named redshift or z')
+	
 
 	####################################################################
 	#### Store the selected redshifts in a array and deduce its length for the loops
@@ -75,12 +75,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	znumber = a.size 
 	redshift = np.zeros(znumber,'float64') 
 	redshift[:] = a
-	#~ print redshift
+
 
 	#### CREATE FALSE REDSHIFT ARRAY FOR TEST
 	redshift = [0.,0.5,1.,2.]
 	znumber = len(redshift) # CHANGE WHEN THE CODE IS RUNNING
-	print redshift
+
        
 	####################################################################
     #### Store the redshifts where bcc fit  and bcc Ls are available in arrays
@@ -96,18 +96,19 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#### get the coefficients from the dat files in the data directory 
 	#### get the large scale amplitude of bcc at different z and for different neutrino masses
 	self.data_directory = data.path['root']
+	print self.data.directory
 
 	#-------------------------------------------------------------------
 	if model =='exp':
 	
-		b1 = np.zeros((len(red2),len(Massbins)))
-		b2 = np.zeros((len(red2),len(Massbins)))
-		bs = np.zeros((len(red2),len(Massbins)))
-		b3nl = np.zeros((len(red2),len(Massbins)))
+		b1 = np.zeros((l2,len(Massbins)))
+		b2 = np.zeros((l2,len(Massbins)))
+		bs = np.zeros((l2,len(Massbins)))
+		b3nl = np.zeros((l2,len(Massbins)))
 
 		if case == 1:
 			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV'\
+				dat_file_path = os.path.join(self.data_directory, '/BE_HaPPy/coefficients/0.0eV'\
 				'/case1/coeff_3exp_0.0_z='+str(i)+'.txt')
 				f = np.loadtxt(dat_file_path)
 				ind = red2.index(i)
@@ -149,10 +150,10 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#-------------------------------------------------------------------
 	if model =='pl':
 	
-		b1 = np.zeros((len(red2),len(Massbins)))
-		b2 = np.zeros((len(red2),len(Massbins)))
-		b3 = np.zeros((len(red2),len(Massbins)))
-		b4 = np.zeros((len(red2),len(Massbins)))
+		b1 = np.zeros((l2,len(Massbins)))
+		b2 = np.zeros((l2,len(Massbins)))
+		b3 = np.zeros((l2,len(Massbins)))
+		b4 = np.zeros((l2,len(Massbins)))
 
 		if case == 1:
 			for i in red2:
@@ -207,7 +208,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	####################################################################
 	#### get the rescaling coefficients according to neutrino mass
-	bcc_LS000 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS000 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.0eV/large_scale/'\
 		'LS_z='+str(i)+'_.txt')
@@ -217,7 +218,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS000[ind,count] = f[ind2]
 	#------------------------------
-	bcc_LS003 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS003 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.03/'\
 		'LS_z='+str(i)+'_.txt')
@@ -227,7 +228,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS003[ind,count] = f[ind2]
 	#------------------------------
-	bcc_LS006 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS006 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.06/'\
 		'LS_z='+str(i)+'_.txt')
@@ -237,7 +238,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS006[ind,count] = f[ind2]
 	#------------------------------
-	bcc_LS010 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS010 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
 		'LS_z='+str(i)+'_.txt')
@@ -247,7 +248,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS010[ind,count] = f[ind2]
 	#------------------------------
-	bcc_LS013 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS013 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.13/'\
 		'LS_z='+str(i)+'_.txt')
@@ -257,7 +258,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS013[ind,count] = f[ind2]
 	#------------------------------
-	bcc_LS015 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS015 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/0.15eV/large_scale/'\
 		'LS_z='+str(i)+'_.txt')
@@ -267,7 +268,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS015[ind,count] = f[ind2]
 	#------------------------------
-	bcc_LS030 = np.zeros((len(red2),len(Massbins)))
+	bcc_LS030 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'montepython/BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
 		'LS_z='+str(i)+'_.txt')
@@ -357,10 +358,10 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	
 	####################################################################
 	#### get the linear power spectrum from class
-	pk_lin = np.zeros((len(kclass), znumber), 'float64')
-	for ik in xrange(len(kclass)):
-		for iz in xrange(znumber):
-			pk_lin[ik,iz] = cosmo.pk_lin(kclass[ik], redshift[iz])	
+	#~ pk_lin = np.zeros((len(kclass), znumber), 'float64')
+	#~ for ik in xrange(len(kclass)):
+		#~ for iz in xrange(znumber):
+			#~ pk_lin[ik,iz] = cosmo.pk_lin(kclass[ik], redshift[iz])	
 	
 	####################################################################
 	###### compute the one loop correction with FAST-PT for the expansion model
