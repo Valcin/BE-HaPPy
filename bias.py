@@ -531,11 +531,30 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count] * F[:,iz]
 					
 
-		if m[0] == 0.15:
-			print 'popo'
+		if m[0] == 0.03:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					PhhDD[:,iz,count] *= bcc_LS003[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.06:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					PhhDD[:,iz,count] *= bcc_LS006[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.10:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					PhhDD[:,iz,count] *= bcc_LS010[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.13:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					PhhDD[:,iz,count] *= bcc_LS013[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.15:
 			for iz in xrange(znumber):
 				for count,j in enumerate(Massbins):
 					PhhDD[:,iz,count] *= bcc_LS015[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.30:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					PhhDD[:,iz,count] *= bcc_LS030[iz,count]/bcc_LS000[iz,count]
 
 		
 		
@@ -572,8 +591,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		PhhDT = PhhDT[lim_l[0]:klim_h+1]
 		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
 
-		return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
-		#~ return kclass,PhhDD, PhhDT, Pmod_tt
+		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
+		return kclass,PhhDD, PhhDT, Pmod_tt
 		
 		
 	####################################################################
@@ -588,11 +607,31 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclass**2) + b3[iz,count]*(kclass**3) \
 				+ b4[iz,count]*(kclass**4) 
 				
-		if m[0] == 0.15:
-			print 'popo'
+		if m[0] == 0.03:
 			for iz in xrange(znumber):
 				for count,j in enumerate(Massbins):
-					bcc[:,iz, count] *= bcc_LS015[iz,count]/bcc_LS000[iz,count]
+					bcc[:,iz,count] *= bcc_LS003[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.06:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz,count] *= bcc_LS006[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.10:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz,count] *= bcc_LS010[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.13:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz,count] *= bcc_LS013[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.15:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz,count] *= bcc_LS015[iz,count]/bcc_LS000[iz,count]
+		elif m[0] == 0.30:
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz,count] *= bcc_LS030[iz,count]/bcc_LS000[iz,count]
+		
 				
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
 		bmm = np.zeros((len(kclass), znumber, len(Massbins)), 'float64')
