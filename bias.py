@@ -212,17 +212,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 					b4[ind,count] = f[ind2,3]
 
 
-
-
-	####################################################################
-	#### and do a linear interpolation on requested redshifts
-	#~ UNDEF = -999.0
-	#~ b1_interp = np.interp(redshift, red1, b1, right=UNDEF)
-	#~ b2_interp = np.interp(redshift, red1, b2, right=UNDEF)
-	#~ b3_interp = np.interp(redshift, red1, b3, right=UNDEF)
-	#~ b4_interp = np.interp(redshift, red1, b4, right=UNDEF)
-
-
 	####################################################################
 	#### get the rescaling coefficients according to neutrino mass
 	bcc_LS000 = np.zeros((l2,len(Massbins)))
@@ -294,16 +283,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		for count,j in enumerate(Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS030[ind,count] = f[ind2]
-
-	
-	#~ bcc_LS000 = np.interp(redshift, red2, bls000)
-	#~ bcc_LS003 = np.interp(redshift, red2, bls003)
-	#~ bcc_LS006 = np.interp(redshift, red2, bls006)
-	#~ bcc_LS010 = np.interp(redshift, red2, bls010)
-	#~ bcc_LS013 = np.interp(redshift, red2, bls013)
-	#~ bcc_LS015 = np.interp(redshift, red2, bls015)
-	#~ bcc_LS030 = np.interp(redshift, red2, bls030)
-
 	
 	####################################################################
 	#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
@@ -608,6 +587,16 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		PhhDD = PhhDD[lim_l[0]:klim_h+1]
 		PhhDT = PhhDT[lim_l[0]:klim_h+1]
 		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
+		
+		
+		
+	#~ bcc_LS000 = np.interp(redshift, red2, bls000)
+	#~ bcc_LS003 = np.interp(redshift, red2, bls003)
+	#~ bcc_LS006 = np.interp(redshift, red2, bls006)
+	#~ bcc_LS010 = np.interp(redshift, red2, bls010)
+	#~ bcc_LS013 = np.interp(redshift, red2, bls013)
+	#~ bcc_LS015 = np.interp(redshift, red2, bls015)
+	#~ bcc_LS030 = np.interp(redshift, red2, bls030)
 
 		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
 		return kclass,PhhDD, PhhDT, Pmod_tt
