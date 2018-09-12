@@ -490,7 +490,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	###### compute the one loop correction with FAST-PT for the expansion model
 
 
-	if model == 'exp':
+	elif model == 'exp':
 		Aprime = np.zeros((350,l2))
 		Bprime = np.zeros((350,l2))
 		Cprime = np.zeros((350,l2))
@@ -598,7 +598,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			
 			
 			
-			
+ 
 			
 		#first mass range
 		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
@@ -652,7 +652,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb[:,iz]/d_tot[:,iz])**2
 				# cross velocity spectrum
 				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
-				(T_cb[:,iz]/d_tot[:,iz])
+				*(T_cb[:,iz]/d_tot[:,iz])
 					
 
 		if m[0] == 0.03:
@@ -732,7 +732,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	###### compute the bias and halo power spectrum for power law model
 
 
-	if model == 'pl':
+	elif model == 'pl':
 		bcc = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
 		for iz in xrange(l2):
 			for count,j in enumerate(Massbins):

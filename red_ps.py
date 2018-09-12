@@ -19,8 +19,6 @@ from bias import Halo
 
 def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 
-	k, P_halo = Halo(self, cosmo, data, model, case, Massbins)
-	
 	####################################################################
 	#### import the requested redshift(s) 
 	try:
@@ -89,7 +87,14 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 		coeffE = 9./2./kappa**2*(coeffD - np.exp(-kappa**2))
 	
 	####################################################################
+	
 	if model == 'exp':
+		print 'popo'
+	
+	#~ if model == 'Kaiser':
+		#~ # we use the power law bias for the kaiser case
+		#~ model == 'pl'
+		#~ k, P_halo = Halo(self, cosmo, data, model, case, Massbins)
 		
 		
 		
