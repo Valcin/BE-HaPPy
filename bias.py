@@ -287,19 +287,11 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	kclass = kget.get('k (h/Mpc)')
 	bound = np.where((kclass > 0)&(kclass < 5.366287e+00))[0]
 	kclass = kclass[bound]
-
-	####################################################################
-	#### get the index of the kmax value in the k.dot array and remove the elements out of range 
-	#### if no kmax is defined the user is asked to define a kmax value in accordance with the 3 k-scale models in the article. 
-	k_article = [0.35,0.2,0.15]
-
-	max_z = np.max(red2)
-	UNDEF = -999.0
-	if max_z > 3:
-		kext = np.interp(max_z, red, [0.12,0.2,0.2,0.2], right=UNDEF)
 	
 	####################################################################
 	#### select the k mode according to the ones in Raccanelli et al. 2017
+	k_article = [0.35,0.2,0.15]
+	
 	if case == 1:
 		kmax = k_article[0]
 	elif case == 2:
@@ -565,6 +557,18 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			f = np.loadtxt(dat_file_path)
 			kpt = f[:,0]
 			Pmod_dd_prime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
+			'/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Pmod_dt_prime[:,count] = f[:,1]
+			#------------------------
+			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
+			'/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
+			f = np.loadtxt(dat_file_path)
+			kpt = f[:,0]
+			Pmod_tt_prime[:,count] = f[:,1]
 		
 		
 		### interpolate the pt coeff on the chosen scale
@@ -577,6 +581,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		G = np.zeros((len(kclass),l2))
 		H = np.zeros((len(kclass),l2))
 		Pmod_dd = np.zeros((len(kclass),l2))
+		Pmod_dt = np.zeros((len(kclass),l2))
+		Pmod_tt = np.zeros((len(kclass),l2))
 		for i in xrange(l2):
 			A[:,i] = np.interp(kclass, kpt, Aprime[:,i]) 
 			B[:,i] = np.interp(kclass, kpt, Bprime[:,i]) 
@@ -587,8 +593,13 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			G[:,i] = np.interp(kclass, kpt, Gprime[:,i]) 
 			H[:,i] = np.interp(kclass, kpt, Hprime[:,i]) 
 			Pmod_dd[:,i] = np.interp(kclass, kpt, Pmod_dd_prime[:,i]) 
+			Pmod_dt[:,i] = np.interp(kclass, kpt, Pmod_dt_prime[:,i]) 
+			Pmod_tt[:,i] = np.interp(kclass, kpt, Pmod_tt_prime[:,i]) 
 			
-
+			
+			
+			
+			
 		#first mass range
 		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
 		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
@@ -631,13 +642,18 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		
 		# compute the halo power spectrum given the coefficient
 		PhhDD = np.zeros((len(kclass),l2,len(Massbins)))
+		PhhDT = np.zeros((len(kclass),l2,len(Massbins)))
 		for iz in xrange(l2):
 			for count,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
-				# density spectrum rescaled by transfer function to get Pmm
+				# density spectrum rescaled by transfer function from bcc ----> bmm
 				PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
 				b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
 				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb[:,iz]/d_tot[:,iz])**2
+				# cross velocity spectrum
+				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
+				(T_cb[:,iz]/d_tot[:,iz])
+					
 
 		if m[0] == 0.03:
 			for iz in xrange(l2):
@@ -696,6 +712,10 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		##### =====> 
 		kclass = kclass[lim_l[0]:klim_h+1]
 		PhhDD = PhhDD[lim_l[0]:klim_h+1]
+		PhhDT = PhhDT[lim_l[0]:klim_h+1]
+		Pmod_dt = Pmod_dt[lim_l[0]:klim_h+1]
+		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
+		
 		
 		# interpolate on selected redshift
 		PhhDDbis = np.zeros((len(kclass),znumber,len(Massbins)))
@@ -705,8 +725,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				PhhDDbis[ik,:,j] = f(redshift)
 	
 
-		#~ return kclass,PhhDD, k, PH1, PH2, PH3, PH4
-		return kclass,PhhDDbis
+		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
+		return kclass,PhhDDbis, PhhDT, Pmod_dt, Pmod_tt
 		
 	####################################################################
 	###### compute the bias and halo power spectrum for power law model

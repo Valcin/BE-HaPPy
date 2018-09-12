@@ -20,6 +20,53 @@ from bias import Halo
 def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 
 	k, P_halo = Halo(self, cosmo, data, model, case, Massbins)
+	
+	####################################################################
+	#### import the requested redshift(s) 
+	try:
+		self.z
+	except:
+		self.z = []
+
+	if len(self.z)>0:
+		redshift = self.z
+	#--------------------------------------------
+	try:
+		self.redshift
+	except:
+		self.redshift = False
+
+	if self.redshift:
+		redshift = self.redshift
+	#--------------------------------------------
+	if not len(self.z)>0 and not self.redshift:
+		raise ValueError('Please define redshift(s) named redshift or z')
+	
+
+	####################################################################
+	#### Store the selected redshifts in a array and deduce its length for the loops
+	#### array manipulation because len() and size only work for znumber >1
+	a = np.array(redshift)
+	znumber = a.size 
+	redshift = np.zeros(znumber,'float64') 
+	redshift[:] = a
+
+	####################################################################
+    #### Store the redshifts where bcc fit  and bcc Ls are available in arrays
+	red2 = [0.0,0.5,1.0,2.0]
+	l2= len(red2)
+	
+	####################################################################
+	#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
+	#### we must extract the k values from the get_transfer list so they coincide. 
+	kget = cosmo.get_transfer(red2[0])
+	kclass = kget.get('k (h/Mpc)')
+	bound = np.where((kclass > 0)&(kclass < 5.366287e+00))[0]
+	kclass = kclass[bound]
+	
+	####################################################################
+	#### Store the mass bins available in an array
+	mbins = ['M1', 'M2', 'M3', 'M4']
 
 	####################################################################
 	#### Define the linear growth factor and growth rate (growth factor f in class)
@@ -29,7 +76,7 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 		f[iz] = cosmo.scale_independent_growth_factor_f(redshift[iz])
 		D[iz] = cosmo.scale_independent_growth_factor(redshift[iz])
 		
-	print f, D
+	#~ print f, D
 
 	####################################################################
 	#### compute the fog multipole coefficient if requested
@@ -43,116 +90,8 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 	
 	####################################################################
 	if model == 'exp':
-		Pmod_dt_prime = np.zeros((350,l2))
-		Pmod_tt_prime = np.zeros((350,l2))
-		
-		for count,iz in enumerate(red2):
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Pmod_dt_prime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Pmod_tt_prime[:,count] = f[:,1]
 		
 		
-		### interpolate the pt coeff on the chosen scale
-		Pmod_dt = np.zeros((len(kclass),l2))
-		Pmod_tt = np.zeros((len(kclass),l2))
-		for i in xrange(l2):
-			Pmod_dt[:,i] = np.interp(kclass, kpt, Pmod_dt_prime[:,i]) 
-			Pmod_tt[:,i] = np.interp(kclass, kpt, Pmod_tt_prime[:,i]) 
-			
-		
-		
-		# compute the halo power spectrum given the coefficient
-		PhhDT = np.zeros((len(kclass),l2,len(Massbins)))
-		for iz in xrange(l2):
-			for count,j in enumerate(Massbins):
-				ind2 = mbins.index(j)
-				# cross velocity spectrum rescaled by transfer function to go from bcc to bmm
-				PhhDT[:,iz,count] = b1[iz,count]*Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
-				*(T_cb[:,iz]/d_tot[:,iz])
-				
-					
-
-		#--------------------------------------------------------------
-		if m[0] == 0.03:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDT[:,iz,count] *= bcc_LS003[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.06:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDT[:,iz,count] *= bcc_LS006[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.10:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDT[:,iz,count] *= bcc_LS010[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.13:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDT[:,iz,count] *= bcc_LS013[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.15:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDT[:,iz,count] *= bcc_LS015[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.30:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDT[:,iz,count] *= bcc_LS030[iz,count]/bcc_LS000[iz,count]
-
-		
-		
-		
-		# create a scale array limited by kmin and kmax
-		try:
-			self.kmax
-		except:
-			self.kmax = False
-		if self.kmax:
-			lim_h = np.where(kclass <= self.kmax)[0]
-		else:
-			lim_h = np.where(kclass <= kmax)[0]
-
-		klim_h = np.amax(lim_h) # define the higher limit
-		
-		#-------------------------------------------------------------------
-		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
-		kmin = 2 * math.pi * Vs**(-1/3.)
-
-		try:
-			self.kmin
-		except:
-			self.kmin = False
-
-		if self.kmin:
-			lim_l = np.where(kclass >= self.kmin)[0]
-		else:
-			lim_l = np.where(kclass >= kmin)[0]
-		#------------------------------------------------------------------
-		##### =====> 
-		kclass = kclass[lim_l[0]:klim_h+1]
-		PhhDT = PhhDT[lim_l[0]:klim_h+1]
-		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
-		
-		
-		# interpolate on selected redshift
-		PhhDTbis = np.zeros((len(kclass),znumber,len(Massbins)))
-		for j in xrange(len(Massbins)):
-			for ik in xrange(len(kclass)):
-				f = interp1d(red2, PhhDT[ik,:,j], kind='cubic', fill_value='extrapolate')
-				PhhDTbis[ik,:,j] = f(redshift)
-	
-
-		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
-		return kclass,PhhDDbis, PhhDT, Pmod_tt
-		k, Pdd,Pdt,Ptt = Halo(self, cosmo, data, model, case, Massbins)
 		
 		#---------------------------------------------------------------
 		if fog:
