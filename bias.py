@@ -4,6 +4,7 @@ from matplotlib.colors import LogNorm
 from scipy.interpolate import interp1d
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
+from pt_coeff import ptcoeff
 import matplotlib.pyplot as plt
 import scipy.constants as const
 import math
@@ -193,7 +194,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 
 	if model == 'lin':
-		bcc = lscoeff(self,data, m[0],Massbins)
+		# tinker effective bias
+		bcc = lscoeff(self,data, m[0],Massbins)[1]
 					
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
 		bmm = np.zeros((len(kclass),l2, len(Massbins)), 'float64')
@@ -243,6 +245,15 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		kclass = kclass[lim_l[0]:klim_h+1]
 		Phh = Phh[lim_l[0]:klim_h+1]
 		
+		# interpolate on selected redshift
+		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
+		for j in xrange(len(Massbins)):
+			for ik in xrange(len(kclass)):
+				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
+				Phhbis[ik,:,j] = f(redshift)
+		
+		return kclass, Phhbis
+		
 		#first mass range
 		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
 		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
@@ -286,169 +297,14 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		
 		
 		#~ return kclass, Phh, k, PH1, PH2, PH3, PH4
-		
-		#~ # interpolate on selected redshift
-		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
-		for j in xrange(len(Massbins)):
-			for ik in xrange(len(kclass)):
-				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
-				Phhbis[ik,:,j] = f(redshift)
-		
-		return kclass, Phhbis
 	
 	####################################################################
 	###### compute the one loop correction with FAST-PT for the expansion model
 
 
 	elif model == 'exp':
-		Aprime = np.zeros((350,l2))
-		Bprime = np.zeros((350,l2))
-		Cprime = np.zeros((350,l2))
-		Dprime = np.zeros((350,l2))
-		Eprime = np.zeros((350,l2))
-		Fprime = np.zeros((350,l2))
-		Gprime = np.zeros((350,l2))
-		Hprime = np.zeros((350,l2))
-		Pmod_dd_prime = np.zeros((350,l2))
-		Pmod_dt_prime = np.zeros((350,l2))
-		Pmod_tt_prime = np.zeros((350,l2))
 		
-		for count,iz in enumerate(red2):
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/A_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Aprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/B_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Bprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/C_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Cprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/D_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Dprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/E_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Eprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/F_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Fprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/G_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Gprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/H_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Hprime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/Pmod_dd_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Pmod_dd_prime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/Pmod_dt_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Pmod_dt_prime[:,count] = f[:,1]
-			#------------------------
-			dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-			'/PT_coeff/Pmod_tt_'+str(iz)+'.txt')
-			f = np.loadtxt(dat_file_path)
-			kpt = f[:,0]
-			Pmod_tt_prime[:,count] = f[:,1]
-		
-		
-		### interpolate the pt coeff on the chosen scale
-		A = np.zeros((len(kclass),l2))
-		B = np.zeros((len(kclass),l2))
-		C = np.zeros((len(kclass),l2))
-		D = np.zeros((len(kclass),l2))
-		E = np.zeros((len(kclass),l2))
-		F = np.zeros((len(kclass),l2))
-		G = np.zeros((len(kclass),l2))
-		H = np.zeros((len(kclass),l2))
-		Pmod_dd = np.zeros((len(kclass),l2))
-		Pmod_dt = np.zeros((len(kclass),l2))
-		Pmod_tt = np.zeros((len(kclass),l2))
-		for i in xrange(l2):
-			A[:,i] = np.interp(kclass, kpt, Aprime[:,i]) 
-			B[:,i] = np.interp(kclass, kpt, Bprime[:,i]) 
-			C[:,i] = np.interp(kclass, kpt, Cprime[:,i]) 
-			D[:,i] = np.interp(kclass, kpt, Dprime[:,i]) 
-			E[:,i] = np.interp(kclass, kpt, Eprime[:,i]) 
-			F[:,i] = np.interp(kclass, kpt, Fprime[:,i]) 
-			G[:,i] = np.interp(kclass, kpt, Gprime[:,i]) 
-			H[:,i] = np.interp(kclass, kpt, Hprime[:,i]) 
-			Pmod_dd[:,i] = np.interp(kclass, kpt, Pmod_dd_prime[:,i]) 
-			Pmod_dt[:,i] = np.interp(kclass, kpt, Pmod_dt_prime[:,i]) 
-			Pmod_tt[:,i] = np.interp(kclass, kpt, Pmod_tt_prime[:,i]) 
-			
-			
-			
- 
-			
-		#first mass range
-		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
-		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
-		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
-		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
-		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ k = d1[:,19]
-		#~ Phh1 = np.zeros((len(k),10))
-		#~ Phh2 = np.zeros((len(k),10))
-		#~ Phh3 = np.zeros((len(k),10))
-		#~ Phh4 = np.zeros((len(k),10))
-		#~ Pshot1 = np.zeros((10))
-		#~ Pshot2 = np.zeros((10))
-		#~ Pshot3 = np.zeros((10))
-		#~ Pshot4 = np.zeros((10))
-		#~ pnum1 = [0,2,4,6,8,10,12,14,16,18]
-		#~ pnum2 = [1,3,5,7,9,11,13,15,17,20]
-		#~ for i in xrange(0,10):
-			#~ Phh1[:,i]= d1[:,pnum1[i]]
-			#~ Phh2[:,i]= d2[:,pnum1[i]]
-			#~ Phh3[:,i]= d3[:,pnum1[i]]
-			#~ Phh4[:,i]= d4[:,pnum1[i]]
-			#~ Pshot1[i]= d1[0,pnum2[i]]
-			#~ Pshot2[i]= d2[0,pnum2[i]]
-			#~ Pshot3[i]= d3[0,pnum2[i]]
-			#~ Pshot4[i]= d4[0,pnum2[i]]
-			#~ Phh1[:,i] = Phh1[:,i]-Pshot1[i]
-			#~ Phh2[:,i] = Phh2[:,i]-Pshot2[i]
-			#~ Phh3[:,i] = Phh3[:,i]-Pshot3[i]
-			#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
-			
-		#~ PH1 = np.mean(Phh1[:,0:11], axis=1)
-		#~ PH2 = np.mean(Phh2[:,0:11], axis=1)
-		#~ PH3 = np.mean(Phh3[:,0:11], axis=1)
-		#~ PH4 = np.mean(Phh4[:,0:11], axis=1)
-		
+		A,B,C,D,E,F,G,H,Pmod_dd,_,_ = ptcoeff(self, data, kclass, Massbins)		
 		
 		# compute the halo power spectrum given the coefficient
 		PhhDD = np.zeros((len(kclass),l2,len(Massbins)))
@@ -461,8 +317,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
 				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb[:,iz]/d_tot[:,iz])**2
 				# cross velocity spectrum
-				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
-				*(T_cb[:,iz]/d_tot[:,iz])
+				#~ PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
+				#~ *(T_cb[:,iz]/d_tot[:,iz])
 		
 		bcc_LS000 = lscoeff(self,data, m[0],Massbins)[0]
 		bcc_LSmassive = lscoeff(self,data, m[0],Massbins)[1]
@@ -500,21 +356,60 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		##### =====> 
 		kclass = kclass[lim_l[0]:klim_h+1]
 		PhhDD = PhhDD[lim_l[0]:klim_h+1]
-		PhhDT = PhhDT[lim_l[0]:klim_h+1]
-		Pmod_dt = Pmod_dt[lim_l[0]:klim_h+1]
-		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
+		#~ PhhDT = PhhDT[lim_l[0]:klim_h+1]
+		#~ Pmod_dt = Pmod_dt[lim_l[0]:klim_h+1]
+		#~ Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
+		
+		#first mass range
+		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
+		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
+		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
+		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
+		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_0.15_z='+str(2.0)+'.txt')
+		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_0.15_z='+str(2.0)+'.txt')
+		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_0.15_z='+str(2.0)+'.txt')
+		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_0.15_z='+str(2.0)+'.txt')
+		
+		#~ k = d1[:,19]
+		#~ Phh1 = np.zeros((len(k),10))
+		#~ Phh2 = np.zeros((len(k),10))
+		#~ Phh3 = np.zeros((len(k),10))
+		#~ Phh4 = np.zeros((len(k),10))
+		#~ Pshot1 = np.zeros((10))
+		#~ Pshot2 = np.zeros((10))
+		#~ Pshot3 = np.zeros((10))
+		#~ Pshot4 = np.zeros((10))
+		#~ pnum1 = [0,2,4,6,8,10,12,14,16,18]
+		#~ pnum2 = [1,3,5,7,9,11,13,15,17,20]
+		#~ for i in xrange(0,10):
+			#~ Phh1[:,i]= d1[:,pnum1[i]]
+			#~ Phh2[:,i]= d2[:,pnum1[i]]
+			#~ Phh3[:,i]= d3[:,pnum1[i]]
+			#~ Phh4[:,i]= d4[:,pnum1[i]]
+			#~ Pshot1[i]= d1[0,pnum2[i]]
+			#~ Pshot2[i]= d2[0,pnum2[i]]
+			#~ Pshot3[i]= d3[0,pnum2[i]]
+			#~ Pshot4[i]= d4[0,pnum2[i]]
+			#~ Phh1[:,i] = Phh1[:,i]-Pshot1[i]
+			#~ Phh2[:,i] = Phh2[:,i]-Pshot2[i]
+			#~ Phh3[:,i] = Phh3[:,i]-Pshot3[i]
+			#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
+			
+		#~ PH1 = np.mean(Phh1[:,0:11], axis=1)
+		#~ PH2 = np.mean(Phh2[:,0:11], axis=1)
+		#~ PH3 = np.mean(Phh3[:,0:11], axis=1)
+		#~ PH4 = np.mean(Phh4[:,0:11], axis=1)
 		
 		
-		#~ # interpolate on selected redshift
+		
+		#~ return kclass, PhhDD, k, PH1, PH2, PH3, PH4
+		# interpolate on selected redshift
 		PhhDDbis = np.zeros((len(kclass),znumber,len(Massbins)))
 		for j in xrange(len(Massbins)):
 			for ik in xrange(len(kclass)):
 				f = interp1d(red2, PhhDD[ik,:,j], kind='cubic', fill_value='extrapolate')
 				PhhDDbis[ik,:,j] = f(redshift)
-	
 
-		#~ return kclass,PhhDD, k, PH1, PH2, PH3, PH4
-		#~ return kclass, PhhDDbis, PhhDT, Pmod_dt, Pmod_tt
 		return kclass, PhhDDbis
 		
 	####################################################################
@@ -586,50 +481,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		kclass = kclass[lim_l[0]:klim_h+1]
 		Phh = Phh[lim_l[0]:klim_h+1]
 		
-		#first mass range
-		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
-		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
-		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
-		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
-		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_0.15_z='+str(2.0)+'.txt')
-		
-		#~ k = d1[:,19]
-		#~ Phh1 = np.zeros((len(k),10))
-		#~ Phh2 = np.zeros((len(k),10))
-		#~ Phh3 = np.zeros((len(k),10))
-		#~ Phh4 = np.zeros((len(k),10))
-		#~ Pshot1 = np.zeros((10))
-		#~ Pshot2 = np.zeros((10))
-		#~ Pshot3 = np.zeros((10))
-		#~ Pshot4 = np.zeros((10))
-		#~ pnum1 = [0,2,4,6,8,10,12,14,16,18]
-		#~ pnum2 = [1,3,5,7,9,11,13,15,17,20]
-		#~ for i in xrange(0,10):
-			#~ Phh1[:,i]= d1[:,pnum1[i]]
-			#~ Phh2[:,i]= d2[:,pnum1[i]]
-			#~ Phh3[:,i]= d3[:,pnum1[i]]
-			#~ Phh4[:,i]= d4[:,pnum1[i]]
-			#~ Pshot1[i]= d1[0,pnum2[i]]
-			#~ Pshot2[i]= d2[0,pnum2[i]]
-			#~ Pshot3[i]= d3[0,pnum2[i]]
-			#~ Pshot4[i]= d4[0,pnum2[i]]
-			#~ Phh1[:,i] = Phh1[:,i]-Pshot1[i]
-			#~ Phh2[:,i] = Phh2[:,i]-Pshot2[i]
-			#~ Phh3[:,i] = Phh3[:,i]-Pshot3[i]
-			#~ Phh4[:,i] = Phh4[:,i]-Pshot4[i]
-			
-		#~ PH1 = np.mean(Phh1[:,0:11], axis=1)
-		#~ PH2 = np.mean(Phh2[:,0:11], axis=1)
-		#~ PH3 = np.mean(Phh3[:,0:11], axis=1)
-		#~ PH4 = np.mean(Phh4[:,0:11], axis=1)
-		
-		
-		
-		#~ return kclass, Phh, k, PH1, PH2, PH3, PH4
-		
 		#~ # interpolate on selected redshift
 		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
 		for j in xrange(len(Massbins)):
@@ -639,6 +490,11 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		
 		return kclass, Phhbis
 		
+		
+		
+		
+		
+	
 
 
 
