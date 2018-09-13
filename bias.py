@@ -3,6 +3,7 @@ from classy import Class
 from matplotlib.colors import LogNorm
 from scipy.interpolate import interp1d
 from bcoeff import bcoeff
+from ls_coeff import lscoeff
 import matplotlib.pyplot as plt
 import scipy.constants as const
 import math
@@ -119,79 +120,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	#-------------------------------------------------------------------
 	if model =='pl':
 		b1, b2, b3, b4 = bcoeff(self, data, model, case, Massbins)
-
-
-	####################################################################
-	#### get the rescaling coefficients according to neutrino mass
-	bcc_LS000 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV/large_scale/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS000[ind,count] = f[ind2]
-	#------------------------------
-	bcc_LS003 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.03/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS003[ind,count] = f[ind2]
-	#------------------------------
-	bcc_LS006 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.06/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS006[ind,count] = f[ind2]
-	#------------------------------
-	bcc_LS010 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS010[ind,count] = f[ind2]
-	#------------------------------
-	bcc_LS013 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.13/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS013[ind,count] = f[ind2]
-	#------------------------------
-	bcc_LS015 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.15eV/large_scale/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS015[ind,count] = f[ind2]
-	#------------------------------
-	bcc_LS030 = np.zeros((l2,len(Massbins)))
-	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
-		'LS_z='+str(i)+'_.txt')
-		f = np.loadtxt(dat_file_path)
-		ind = red2.index(i)
-		for count,j in enumerate(Massbins):
-			ind2 = mbins.index(j)
-			bcc_LS030[ind,count] = f[ind2]
 	
 	####################################################################
 	#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
@@ -265,38 +193,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 
 	if model == 'lin':
-		
-		bcc = np.zeros((l2, len(Massbins)), 'float64')
-		
-		if m[0] == 0.0:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS000[iz,count]
-		if m[0] == 0.03:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS003[iz,count]
-		elif m[0] == 0.06:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS006[iz,count]
-		elif m[0] == 0.10:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS010[iz,count]
-		elif m[0] == 0.13:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS013[iz,count]
-		elif m[0] == 0.15:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS015[iz,count]
-		elif m[0] == 0.30:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[iz,count] = bcc_LS030[iz,count]
-		
+		bcc = lscoeff(self,data, m[0],Massbins)
 					
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
 		bmm = np.zeros((len(kclass),l2, len(Massbins)), 'float64')
@@ -566,35 +463,13 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				# cross velocity spectrum
 				PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
 				*(T_cb[:,iz]/d_tot[:,iz])
-					
-
-		if m[0] == 0.03:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDD[:,iz,count] *= bcc_LS003[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.06:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDD[:,iz,count] *= bcc_LS006[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.10:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDD[:,iz,count] *= bcc_LS010[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.13:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDD[:,iz,count] *= bcc_LS013[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.15:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDD[:,iz,count] *= bcc_LS015[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.30:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					PhhDD[:,iz,count] *= bcc_LS030[iz,count]/bcc_LS000[iz,count]
-
 		
-		
+		bcc_LS000 = lscoeff(self,data, m[0],Massbins)[0]
+		bcc_LSmassive = lscoeff(self,data, m[0],Massbins)[1]
+		# if mv = 0.0eV bcc_LS000 = bcc_LSmassive
+		for iz in xrange(l2):
+				for count,j in enumerate(Massbins):
+					PhhDD[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
 		
 		# create a scale array limited by kmin and kmax
 		try:
@@ -630,7 +505,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		Pmod_tt = Pmod_tt[lim_l[0]:klim_h+1]
 		
 		
-		# interpolate on selected redshift
+		#~ # interpolate on selected redshift
 		PhhDDbis = np.zeros((len(kclass),znumber,len(Massbins)))
 		for j in xrange(len(Massbins)):
 			for ik in xrange(len(kclass)):
@@ -638,7 +513,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				PhhDDbis[ik,:,j] = f(redshift)
 	
 
-		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
+		#~ return kclass,PhhDD, k, PH1, PH2, PH3, PH4
 		#~ return kclass, PhhDDbis, PhhDT, Pmod_dt, Pmod_tt
 		return kclass, PhhDDbis
 		
@@ -654,30 +529,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclass**2) + b3[iz,count]*(kclass**3) \
 				+ b4[iz,count]*(kclass**4) 
 				
-		if m[0] == 0.03:
-			for iz in xrange(l2):
+		bcc_LS000 = lscoeff(self,data, m[0],Massbins)[0]
+		bcc_LSmassive = lscoeff(self,data, m[0],Massbins)[1]
+		# if mv = 0.0eV bcc_LS000 = bcc_LSmassive
+		for iz in xrange(l2):
 				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LS003[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.06:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LS006[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.10:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LS010[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.13:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LS013[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.15:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LS015[iz,count]/bcc_LS000[iz,count]
-		elif m[0] == 0.30:
-			for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LS030[iz,count]/bcc_LS000[iz,count]
+					bcc[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
 		
 				
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
@@ -773,7 +630,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		
 		#~ return kclass, Phh, k, PH1, PH2, PH3, PH4
 		
-		# interpolate on selected redshift
+		#~ # interpolate on selected redshift
 		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
 		for j in xrange(len(Massbins)):
 			for ik in xrange(len(kclass)):
