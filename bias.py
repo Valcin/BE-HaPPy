@@ -2,6 +2,7 @@
 from classy import Class
 from matplotlib.colors import LogNorm
 from scipy.interpolate import interp1d
+from bcoeff import bcoeff
 import matplotlib.pyplot as plt
 import scipy.constants as const
 import math
@@ -113,99 +114,11 @@ def Halo(self, cosmo, data, model, case, Massbins):
 
 	#-------------------------------------------------------------------
 	if model =='exp':
-	
-		b1 = np.zeros((l2,len(Massbins)))
-		b2 = np.zeros((l2,len(Massbins)))
-		bs = np.zeros((l2,len(Massbins)))
-		b3nl = np.zeros((l2,len(Massbins)))
-
-		if case == 1:
-			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-				'/case1/coeff_3exp_0.0_z='+str(i)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				ind = red2.index(i)
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					b1[ind,count] = f[ind2,0]
-					b2[ind,count] = f[ind2,1]
-					bs[ind,count] = f[ind2,2]
-					b3nl[ind,count] = f[ind2,3]
-
-		if case == 2:
-			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_3exp_0.0_z='+str(i)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				ind = red2.index(i)
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					b1[ind,count] = f[ind2,0]
-					b2[ind,count] = f[ind2,1]
-					bs[ind,count] = f[ind2,2]
-					b3nl[ind,count] = f[ind2,3]
-
-		if case == 3:
-			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_3exp_0.0_z='+str(i)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				ind = red2.index(i)
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					b1[ind,count] = f[ind2,0]
-					b2[ind,count] = f[ind2,1]
-					bs[ind,count] = f[ind2,2]
-					b3nl[ind,count] = f[ind2,3]
-					
-	
+		b1, b2, bs, b3nl = bcoeff(self, data, model, case, Massbins)
 
 	#-------------------------------------------------------------------
 	if model =='pl':
-	
-		b1 = np.zeros((l2,len(Massbins)))
-		b2 = np.zeros((l2,len(Massbins)))
-		b3 = np.zeros((l2,len(Massbins)))
-		b4 = np.zeros((l2,len(Massbins)))
-
-		if case == 1:
-			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-				'/case1/coeff_pl_0.0_z='+str(i)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				ind = red2.index(i)
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					b1[ind,count] = f[ind2,0]
-					b2[ind,count] = f[ind2,1]
-					b3[ind,count] = f[ind2,2]
-					b4[ind,count] = f[ind2,3]
-
-		if case == 2:
-			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_pl_0.0_z='+str(i)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				ind = red2.index(i)
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					b1[ind,count] = f[ind2,0]
-					b2[ind,count] = f[ind2,1]
-					b3[ind,count] = f[ind2,2]
-					b4[ind,count] = f[ind2,3]
-
-		if case == 3:
-			for i in red2:
-				dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
-				'/case2/coeff_pl_0.0_z='+str(i)+'.txt')
-				f = np.loadtxt(dat_file_path)
-				ind = red2.index(i)
-				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
-					b1[ind,count] = f[ind2,0]
-					b2[ind,count] = f[ind2,1]
-					b3[ind,count] = f[ind2,2]
-					b4[ind,count] = f[ind2,3]
+		b1, b2, b3, b4 = bcoeff(self, data, model, case, Massbins)
 
 
 	####################################################################
@@ -726,7 +639,8 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	
 
 		#~ return kclass,PhhDD, PhhDT, Pmod_tt, k, PH1, PH2, PH3, PH4
-		return kclass,PhhDDbis, PhhDT, Pmod_dt, Pmod_tt
+		#~ return kclass, PhhDDbis, PhhDT, Pmod_dt, Pmod_tt
+		return kclass, PhhDDbis
 		
 	####################################################################
 	###### compute the bias and halo power spectrum for power law model
