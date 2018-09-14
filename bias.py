@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
 from pt_coeff import ptcoeff
-from error import error
+import error
 import matplotlib.pyplot as plt
 import scipy.constants as const
 import math
@@ -37,7 +37,7 @@ import sys
 #pivot_tensor = 0.05
 ########################################################################
 
-def Halo(self, cosmo, data, model, case, Massbins):
+def Halo(self, cosmo, data, model, case, Massbins, err = None):
 
 	np.set_printoptions(precision=3)
 	
@@ -69,6 +69,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	if m[0] not in mv:
 		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
 
+	print 'Total neutrino mass is '+str(m[0])
 	####################################################################
 	#### import the requested redshift(s) 
 	try:
@@ -98,7 +99,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	znumber = a.size 
 	redshift = np.zeros(znumber,'float64') 
 	redshift[:] = a
-
        
 	####################################################################
     #### Store the redshifts where bcc fit  and bcc Ls are available in arrays
@@ -112,8 +112,6 @@ def Halo(self, cosmo, data, model, case, Massbins):
 	
 	####################################################################
 	#### get the coefficients from the dat files in the data directory 
-	#### get the large scale amplitude of bcc at different z and for different neutrino masses
-	self.data_directory = data.path['root']
 
 	#-------------------------------------------------------------------
 	if model =='exp':
@@ -221,7 +219,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			self.kmax
 		except:
 			self.kmax = False
-		if self.kmax:
+		if self.kmax and self.kmax < kmax:
 			lim_h = np.where(kclass <= self.kmax)[0]
 		else:
 			lim_h = np.where(kclass <= kmax)[0]
@@ -231,13 +229,13 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		#-------------------------------------------------------------------
 		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
 		kmin = 2 * math.pi * Vs**(-1/3.)
-
+		
 		try:
 			self.kmin
 		except:
 			self.kmin = False
 
-		if self.kmin:
+		if self.kmin and self.kmin > kmin:
 			lim_l = np.where(kclass >= self.kmin)[0]
 		else:
 			lim_l = np.where(kclass >= kmin)[0]
@@ -252,6 +250,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			for ik in xrange(len(kclass)):
 				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
 				Phhbis[ik,:,j] = f(redshift)
+				
+		if err == True:
+			if m[0] == 0.0 or m[0] == 0.15:
+				error.error(self, data, kclass, Phhbis, redshift, m[0], Massbins)
+			else:
+				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
 		
 		return kclass, Phhbis
 	
@@ -272,7 +276,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 				# density spectrum rescaled by transfer function from bcc ----> bmm
 				PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
 				b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
-				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] * (T_cb[:,iz]/d_tot[:,iz])**2
+				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] #* (T_cb[:,iz]/d_tot[:,iz])**2
 				# cross velocity spectrum
 				#~ PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
 				#~ *(T_cb[:,iz]/d_tot[:,iz])
@@ -285,11 +289,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 					PhhDD[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
 		
 		# create a scale array limited by kmin and kmax
+
 		try:
 			self.kmax
 		except:
 			self.kmax = False
-		if self.kmax:
+		if self.kmax and self.kmax < kmax:
 			lim_h = np.where(kclass <= self.kmax)[0]
 		else:
 			lim_h = np.where(kclass <= kmax)[0]
@@ -299,13 +304,13 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		#-------------------------------------------------------------------
 		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
 		kmin = 2 * math.pi * Vs**(-1/3.)
-
+		
 		try:
 			self.kmin
 		except:
 			self.kmin = False
 
-		if self.kmin:
+		if self.kmin and self.kmin > kmin:
 			lim_l = np.where(kclass >= self.kmin)[0]
 		else:
 			lim_l = np.where(kclass >= kmin)[0]
@@ -320,6 +325,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			for ik in xrange(len(kclass)):
 				f = interp1d(red2, PhhDD[ik,:,j], kind='cubic', fill_value='extrapolate')
 				PhhDDbis[ik,:,j] = f(redshift)
+				
+		if err == True:
+			if m[0] == 0.0 or m[0] == 0.15:
+				error.error(self, data, kclass, PhhDDbis, redshift, m[0], Massbins)
+			else:
+				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
 
 		return kclass, PhhDDbis
 		
@@ -367,7 +378,7 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			self.kmax
 		except:
 			self.kmax = False
-		if self.kmax:
+		if self.kmax and self.kmax < kmax:
 			lim_h = np.where(kclass <= self.kmax)[0]
 		else:
 			lim_h = np.where(kclass <= kmax)[0]
@@ -377,13 +388,13 @@ def Halo(self, cosmo, data, model, case, Massbins):
 		#-------------------------------------------------------------------
 		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
 		kmin = 2 * math.pi * Vs**(-1/3.)
-
+		
 		try:
 			self.kmin
 		except:
 			self.kmin = False
 
-		if self.kmin:
+		if self.kmin and self.kmin > kmin:
 			lim_l = np.where(kclass >= self.kmin)[0]
 		else:
 			lim_l = np.where(kclass >= kmin)[0]
@@ -398,6 +409,12 @@ def Halo(self, cosmo, data, model, case, Massbins):
 			for ik in xrange(len(kclass)):
 				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
 				Phhbis[ik,:,j] = f(redshift)
+				
+		if err == True:
+			if m[0] == 0.0 or m[0] == 0.15:
+				error.error(self, data, kclass, Phhbis, redshift, m[0], Massbins)
+			else:
+				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
 		
 		return kclass, Phhbis
 		
