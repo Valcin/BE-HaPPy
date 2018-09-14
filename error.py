@@ -114,6 +114,7 @@ def error(self,data, kclass, P_halo, redshift, mv, Massbins):
 		P3[:,j] = PH3
 		P4[:,j] = PH4
 	
+	####################################################################
 	# interpolate on selected redshift
 	Phh1bis = np.zeros((len(k),znumber))
 	Phh2bis = np.zeros((len(k),znumber))
@@ -128,12 +129,8 @@ def error(self,data, kclass, P_halo, redshift, mv, Massbins):
 		Phh2bis[ik,:] = f2(redshift)
 		Phh3bis[ik,:] = f3(redshift)
 		Phh4bis[ik,:] = f4(redshift)
-	
-	
-	####################################################################
-	#### compute error on selected k
-	
 
+	# interpolate on selected k
 	P1bis = np.zeros((len(kclass),znumber))
 	P2bis = np.zeros((len(kclass),znumber))
 	P3bis = np.zeros((len(kclass),znumber))
