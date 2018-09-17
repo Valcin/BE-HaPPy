@@ -258,7 +258,92 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
 		
 		return kclass, Phhbis
-	
+		
+	####################################################################
+	###### compute the bias and halo power spectrum for power law model
+
+
+	elif model == 'pl':
+		bcc = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
+		for iz in xrange(l2):
+			for count,j in enumerate(Massbins):
+				ind2 = mbins.index(j)
+				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclass**2) + b3[iz,count]*(kclass**3) \
+				+ b4[iz,count]*(kclass**4) 
+				
+		bcc_LS000 = lscoeff(self,data, m[0],Massbins)[0]
+		bcc_LSmassive = lscoeff(self,data, m[0],Massbins)[1]
+		# if mv = 0.0eV bcc_LS000 = bcc_LSmassive
+		for iz in xrange(l2):
+				for count,j in enumerate(Massbins):
+					bcc[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
+		
+				
+		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
+		bmm = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
+		for iz in xrange(l2):
+			for count,j in enumerate(Massbins):
+				ind2 = mbins.index(j)
+				bmm[:,iz, count] = bcc[:,iz,count] * (T_cb[:,iz]/d_tot[:,iz])
+
+		# Compute the halo Power spectrum in real space
+		Phh = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
+		for iz in xrange(l2):
+			for count,j in enumerate(Massbins):
+				ind2 = mbins.index(j)
+				Phh[:,iz,count] = pk[:,iz] * bmm[:,iz, count]**2
+			
+			
+		# rescale the k and power spectrum because of classy/class difference
+		kclass /= h
+		Phh *= h**3
+		
+		# create a scale array limited by kmin and kmax
+		try:
+			self.kmax
+		except:
+			self.kmax = False
+		if self.kmax and self.kmax < kmax:
+			lim_h = np.where(kclass <= self.kmax)[0]
+		else:
+			lim_h = np.where(kclass <= kmax)[0]
+
+		klim_h = np.amax(lim_h) # define the higher limit
+		
+		#-------------------------------------------------------------------
+		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
+		kmin = 2 * math.pi * Vs**(-1/3.)
+		
+		try:
+			self.kmin
+		except:
+			self.kmin = False
+
+		if self.kmin and self.kmin > kmin:
+			lim_l = np.where(kclass >= self.kmin)[0]
+		else:
+			lim_l = np.where(kclass >= kmin)[0]
+		#------------------------------------------------------------------
+		##### =====> 
+		kclass = kclass[lim_l[0]:klim_h+1]
+		Phh = Phh[lim_l[0]:klim_h+1]
+		
+		#~ # interpolate on selected redshift
+		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
+		for j in xrange(len(Massbins)):
+			for ik in xrange(len(kclass)):
+				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
+				Phhbis[ik,:,j] = f(redshift)
+				
+		if err == True:
+			if m[0] == 0.0 or m[0] == 0.15:
+				error.error(self, data, kclass, Phhbis, redshift, m[0], Massbins)
+			else:
+				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
+		
+		return kclass, Phhbis
+		
+		
 	####################################################################
 	###### compute the one loop correction with FAST-PT for the expansion model
 
@@ -333,93 +418,6 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
 
 		return kclass, PhhDDbis
-		
-	####################################################################
-	###### compute the bias and halo power spectrum for power law model
-
-
-	elif model == 'pl':
-		bcc = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
-		for iz in xrange(l2):
-			for count,j in enumerate(Massbins):
-				ind2 = mbins.index(j)
-				bcc[:,iz, count] = b1[iz,count] + b2[iz,count]*(kclass**2) + b3[iz,count]*(kclass**3) \
-				+ b4[iz,count]*(kclass**4) 
-				
-		bcc_LS000 = lscoeff(self,data, m[0],Massbins)[0]
-		bcc_LSmassive = lscoeff(self,data, m[0],Massbins)[1]
-		# if mv = 0.0eV bcc_LS000 = bcc_LSmassive
-		for iz in xrange(l2):
-				for count,j in enumerate(Massbins):
-					bcc[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
-		
-				
-		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
-		bmm = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
-		for iz in xrange(l2):
-			for count,j in enumerate(Massbins):
-				ind2 = mbins.index(j)
-				bmm[:,iz, count] = bcc[:,iz,count] * (T_cb[:,iz]/d_tot[:,iz])# * (bcc_LS0[iz]/denom[iz])
-
-		# Compute the halo Power spectrum in real space
-		Phh = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
-		for iz in xrange(l2):
-			for count,j in enumerate(Massbins):
-				ind2 = mbins.index(j)
-				Phh[:,iz,count] = pk[:,iz] * bmm[:,iz, count]**2
-			
-			
-		# rescale the k and power spectrum because of classy/class difference
-		kclass /= h
-		Phh *= h**3
-		
-		# create a scale array limited by kmin and kmax
-		try:
-			self.kmax
-		except:
-			self.kmax = False
-		if self.kmax and self.kmax < kmax:
-			lim_h = np.where(kclass <= self.kmax)[0]
-		else:
-			lim_h = np.where(kclass <= kmax)[0]
-
-		klim_h = np.amax(lim_h) # define the higher limit
-		
-		#-------------------------------------------------------------------
-		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
-		kmin = 2 * math.pi * Vs**(-1/3.)
-		
-		try:
-			self.kmin
-		except:
-			self.kmin = False
-
-		if self.kmin and self.kmin > kmin:
-			lim_l = np.where(kclass >= self.kmin)[0]
-		else:
-			lim_l = np.where(kclass >= kmin)[0]
-		#------------------------------------------------------------------
-		##### =====> 
-		kclass = kclass[lim_l[0]:klim_h+1]
-		Phh = Phh[lim_l[0]:klim_h+1]
-		
-		#~ # interpolate on selected redshift
-		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
-		for j in xrange(len(Massbins)):
-			for ik in xrange(len(kclass)):
-				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
-				Phhbis[ik,:,j] = f(redshift)
-				
-		if err == True:
-			if m[0] == 0.0 or m[0] == 0.15:
-				error.error(self, data, kclass, Phhbis, redshift, m[0], Massbins)
-			else:
-				print 'the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry'
-		
-		return kclass, Phhbis
-		
-		
-		
 		
 		
 	

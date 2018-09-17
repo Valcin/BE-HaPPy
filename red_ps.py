@@ -5,6 +5,9 @@
 
 from classy import Class
 from matplotlib.colors import LogNorm
+from bcoeff import bcoeff
+from ls_coeff import lscoeff
+from pt_coeff import ptcoeff
 import matplotlib.pyplot as plt
 import scipy.constants as const
 import math
@@ -40,6 +43,17 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 	if not len(self.z)>0 and not self.redshift:
 		raise ValueError('Please define redshift(s) named redshift or z')
 	
+	####################################################################
+	#### Check if the total neutrino mass corresponds to one of the available ones
+	#### get_current_derived_parameters returns a dict so must be converted
+	m = cosmo.get_current_derived_parameters(['m_ncdm_tot'])
+	m = m.values()
+	m = [ round(elem, 2) for elem in m ]
+	mv = [0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30]
+	if m[0] not in mv:
+		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
+
+	print 'Total neutrino mass is '+str(m[0])
 
 	####################################################################
 	#### Store the selected redshifts in a array and deduce its length for the loops
@@ -87,20 +101,28 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 		coeffE = 9./2./kappa**2*(coeffD - np.exp(-kappa**2))
 	
 	####################################################################
-	
-	
-	
 	if model == 'lin':
-		# we use the power law bias for the kaiser case
+		# get the fitted ps from p_halo
 		k, P_halo = Halo(self, cosmo, data, 'lin', case, Massbins)
 		
+		# tinker effective bias
+		bcc = lscoeff(self,data, m[0],Massbins)[1]
+					
+		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
+		bmm = np.zeros((len(kclass),l2, len(Massbins)), 'float64')
+		for iz in xrange(l2):
+			for count,j in enumerate(Massbins):
+				bmm[:,iz, count] = bcc[iz,count] * (T_cb[:,iz]/d_tot[:,iz])
+
+		# Compute the halo Power spectrum in real space
 		if RSD == 0:
 			print 'you chose Kaiser model'
 			dim = np.shape(P_halo)
 			Pred = np.zeros(dim)
 			for iz in xrange(znumber):
-				b = 0.85
-				Pred[:,iz,:] = P_halo[:,iz,:] + 2/3.*b*f[iz] + 1/5.*f[iz]**2
+				for count,j in enumerate(Massbins):
+					ind2 = mbins.index(j)
+					Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz] + 1/5.*f[iz]**2
 
 		return k, Pred
 	#---------------------------------------------------------------
