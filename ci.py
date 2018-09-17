@@ -1,5 +1,23 @@
 
-def classimport(self, cosmo, data, red2)
+from classy import Class
+from matplotlib.colors import LogNorm
+from bcoeff import bcoeff
+from ls_coeff import lscoeff
+from pt_coeff import ptcoeff
+import matplotlib.pyplot as plt
+import scipy.constants as const
+import math
+import os
+import numpy as np
+import warnings
+import csv
+import sys
+sys.path.append('/home/david/codes/FAST-PT')
+import myFASTPT as FPT
+from bias import Halo
+
+
+def ci(self, cosmo, data, red2):
 
 ####################################################################
 	#### import the requested redshift(s) 

@@ -2,7 +2,7 @@
 from classy import Class
 from matplotlib.colors import LogNorm
 from scipy.interpolate import interp1d
-from classy_import import classimport
+from ci import classy_import
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
 from pt_coeff import ptcoeff
@@ -40,66 +40,66 @@ import sys
 
 def Halo(self, cosmo, data, model, case, Massbins, err = None):
 
-	np.set_printoptions(precision=3)
+	#~ np.set_printoptions(precision=3)
 	
-	####################################################################
-	#### check if the transfer functions were computed 
-	test1 = data.cosmo_arguments
-	output = test1.get('output')
-	if 'mTk' not in output:
-		raise ValueError('You forgot to declare mTk in Class output')
+	#~ ####################################################################
+	#~ #### check if the transfer functions were computed 
+	#~ test1 = data.cosmo_arguments
+	#~ output = test1.get('output')
+	#~ if 'mTk' not in output:
+		#~ raise ValueError('You forgot to declare mTk in Class output')
 
-	####################################################################
-	#### check if the non linear power spectrum has been requested 
-        test2 = data.cosmo_arguments.keys()
-	if 'non linear' not in test2:
-		raise ValueError('You forgot to request the non linear spectrum')
+	#~ ####################################################################
+	#~ #### check if the non linear power spectrum has been requested 
+        #~ test2 = data.cosmo_arguments.keys()
+	#~ if 'non linear' not in test2:
+		#~ raise ValueError('You forgot to request the non linear spectrum')
 
-	####################################################################
-	#### check if kmax is defined in the data file of your likelihood 
-	if 'z_max_pk' not in test2:
-		raise ValueError('You must declare a z_max_pk for the computation of the transfer functions')
+	#~ ####################################################################
+	#~ #### check if kmax is defined in the data file of your likelihood 
+	#~ if 'z_max_pk' not in test2:
+		#~ raise ValueError('You must declare a z_max_pk for the computation of the transfer functions')
 
-	####################################################################
-	#### Check if the total neutrino mass corresponds to one of the available ones
-	#### get_current_derived_parameters returns a dict so must be converted
-	m = cosmo.get_current_derived_parameters(['m_ncdm_tot'])
-	m = m.values()
-	m = [ round(elem, 2) for elem in m ]
-	mv = [0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30]
-	if m[0] not in mv:
-		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
+	#~ ####################################################################
+	#~ #### Check if the total neutrino mass corresponds to one of the available ones
+	#~ #### get_current_derived_parameters returns a dict so must be converted
+	#~ m = cosmo.get_current_derived_parameters(['m_ncdm_tot'])
+	#~ m = m.values()
+	#~ m = [ round(elem, 2) for elem in m ]
+	#~ mv = [0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30]
+	#~ if m[0] not in mv:
+		#~ raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
 
-	print 'Total neutrino mass is '+str(m[0])
-	####################################################################
-	#### import the requested redshift(s) 
-	try:
-		self.z
-	except:
-		self.z = []
+	#~ print 'Total neutrino mass is '+str(m[0])
+	#~ ####################################################################
+	#~ #### import the requested redshift(s) 
+	#~ try:
+		#~ self.z
+	#~ except:
+		#~ self.z = []
 
-	if len(self.z)>0:
-		redshift = self.z
-	#--------------------------------------------
-	try:
-		self.redshift
-	except:
-		self.redshift = False
+	#~ if len(self.z)>0:
+		#~ redshift = self.z
+	#~ #--------------------------------------------
+	#~ try:
+		#~ self.redshift
+	#~ except:
+		#~ self.redshift = False
 
-	if self.redshift:
-		redshift = self.redshift
-	#--------------------------------------------
-	if not len(self.z)>0 and not self.redshift:
-		raise ValueError('Please define redshift(s) named redshift or z')
+	#~ if self.redshift:
+		#~ redshift = self.redshift
+	#~ #--------------------------------------------
+	#~ if not len(self.z)>0 and not self.redshift:
+		#~ raise ValueError('Please define redshift(s) named redshift or z')
 	
 
 	####################################################################
 	#### Store the selected redshifts in a array and deduce its length for the loops
 	#### array manipulation because len() and size only work for znumber >1
-	a = np.array(redshift)
-	znumber = a.size 
-	redshift = np.zeros(znumber,'float64') 
-	redshift[:] = a
+	#~ a = np.array(redshift)
+	#~ znumber = a.size 
+	#~ redshift = np.zeros(znumber,'float64') 
+	#~ redshift[:] = a
        
 	####################################################################
     #### Store the redshifts where bcc fit  and bcc Ls are available in arrays
@@ -125,10 +125,10 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 	####################################################################
 	#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
 	#### we must extract the k values from the get_transfer list so they coincide. 
-	kget = cosmo.get_transfer(red2[0])
-	kclass = kget.get('k (h/Mpc)')
-	bound = np.where((kclass > 0)&(kclass < 5.366287e+00))[0]
-	kclass = kclass[bound]
+	#~ kget = cosmo.get_transfer(red2[0])
+	#~ kclass = kget.get('k (h/Mpc)')
+	#~ bound = np.where((kclass > 0)&(kclass < 5.366287e+00))[0]
+	#~ kclass = kclass[bound]
 	
 	####################################################################
 	#### select the k mode according to the ones in Raccanelli et al. 2017
@@ -144,42 +144,42 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 	####################################################################
 	#### get the value of h to rescale the power spectrum and wavenumber
 	#### because of the difference between Class and Class python wrapper 
-	param = cosmo.get_current_derived_parameters(['h','Omega0_lambda'])
-	param = param.values()
-	param = [ round(elem, 5) for elem in param ]
-	h = param[0]
-	Omega_lambda = param[1]
+	#~ param = cosmo.get_current_derived_parameters(['h','Omega0_lambda'])
+	#~ param = param.values()
+	#~ param = [ round(elem, 5) for elem in param ]
+	#~ h = param[0]
+	#~ Omega_lambda = param[1]
 
-	####################################################################
-	#### get the transfer function from class
-	d_b = np.zeros((len(kclass), l2), 'float64')
-	d_cdm = np.zeros((len(kclass), l2), 'float64')
-	d_tot = np.zeros((len(kclass), l2), 'float64')
-	for i in xrange(l2):
-		transfer = cosmo.get_transfer(red2[i])
-		d_b[:,i] = transfer.get('d_b')[bound]
-		d_cdm[:,i] = transfer.get('d_cdm')[bound]
-		d_tot[:,i] = transfer.get('d_tot')[bound]
+	#~ ####################################################################
+	#~ #### get the transfer function from class
+	#~ d_b = np.zeros((len(kclass), l2), 'float64')
+	#~ d_cdm = np.zeros((len(kclass), l2), 'float64')
+	#~ d_tot = np.zeros((len(kclass), l2), 'float64')
+	#~ for i in xrange(l2):
+		#~ transfer = cosmo.get_transfer(red2[i])
+		#~ d_b[:,i] = transfer.get('d_b')[bound]
+		#~ d_cdm[:,i] = transfer.get('d_cdm')[bound]
+		#~ d_tot[:,i] = transfer.get('d_tot')[bound]
 
-	####################################################################
-	#### import Omega_b and Omega_cdm from class. Remember to add Omega_cdm in classy and recompile after
-	Omega_b = cosmo.Omega_b()
-	Omega_cdm = cosmo.Omega_cdm()
-	Omega_m = cosmo.Omega_m()
+	#~ ####################################################################
+	#~ #### import Omega_b and Omega_cdm from class. Remember to add Omega_cdm in classy and recompile after
+	#~ Omega_b = cosmo.Omega_b()
+	#~ Omega_cdm = cosmo.Omega_cdm()
+	#~ Omega_m = cosmo.Omega_m()
 
 
-	####################################################################
-	#### define the CDM + baryons transfer function 
-	T_cb = np.zeros((len(kclass), l2), 'float64')
-	T_cb = (Omega_cdm * d_cdm + Omega_b * d_b)/(Omega_cdm + Omega_b)
+	#~ ####################################################################
+	#~ #### define the CDM + baryons transfer function 
+	#~ T_cb = np.zeros((len(kclass), l2), 'float64')
+	#~ T_cb = (Omega_cdm * d_cdm + Omega_b * d_b)/(Omega_cdm + Omega_b)
     
     
-	####################################################################
-	#### get the non linear power spectrum from class
-	pk = np.zeros((len(kclass), l2), 'float64')
-	for ik in xrange(len(kclass)):
-		for iz in xrange(l2):
-			pk[ik,iz] = cosmo.pk(kclass[ik], red2[iz])
+	#~ ####################################################################
+	#~ #### get the non linear power spectrum from class
+	#~ pk = np.zeros((len(kclass), l2), 'float64')
+	#~ for ik in xrange(len(kclass)):
+		#~ for iz in xrange(l2):
+			#~ pk[ik,iz] = cosmo.pk(kclass[ik], red2[iz])
 
 	
 	####################################################################
@@ -189,6 +189,11 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 		#~ for iz in xrange(l2):
 			#~ pk_lin[ik,iz] = cosmo.pk_lin(kclass[ik], red2[iz])	
 			
+			
+	####################################################################
+	#### import classy results
+	redshift, mv, h, d_tot, T_cb, pk, f, D = classy_import(self,cosmo, data, red2 )
+	
 	####################################################################
 	###### compute the power spectrum with linear bias
 
