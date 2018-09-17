@@ -2,6 +2,7 @@
 from classy import Class
 from matplotlib.colors import LogNorm
 from scipy.interpolate import interp1d
+from classy_import import classimport
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
 from pt_coeff import ptcoeff
