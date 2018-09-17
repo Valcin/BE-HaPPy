@@ -5,7 +5,7 @@
 
 from classy import Class
 from matplotlib.colors import LogNorm
-from cimport import classy_import
+from cimp import cimp
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
 from pt_coeff import ptcoeff
@@ -42,7 +42,7 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 		
 	####################################################################
 	#### import classy results
-	redshift, mv, h, d_tot, T_cb, pk, f, D = classy_import(self,cosmo, data, red2 )
+	redshift, znumber, mv, h, d_tot, T_cb, kclass, pk, f, D = cimp(self, cosmo, data)
 
 	####################################################################
 	#### compute the fog multipole coefficient if requested

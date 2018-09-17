@@ -1,5 +1,4 @@
 
-from classy import Class
 from matplotlib.colors import LogNorm
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
@@ -12,12 +11,9 @@ import numpy as np
 import warnings
 import csv
 import sys
-sys.path.append('/home/david/codes/FAST-PT')
-import myFASTPT as FPT
-from bias import Halo
 
 
-def ci(self, cosmo, data, red2):
+def cimp(self, cosmo, data):
 
 ####################################################################
 	#### import the requested redshift(s) 
@@ -50,7 +46,7 @@ def ci(self, cosmo, data, red2):
 	if m[0] not in mv:
 		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
 
-	
+	print 'The total neutrino mass is '+str(m[0])
 
 	####################################################################
 	#### Store the selected redshifts in a array and deduce its length for the loops
@@ -62,7 +58,7 @@ def ci(self, cosmo, data, red2):
 
 	####################################################################
     #### Store the redshifts where bcc fit  and bcc Ls are available in arrays
-	#~ red2 = [0.0,0.5,1.0,2.0]
+	red2 = [0.0,0.5,1.0,2.0]
 	l2= len(red2)
 	
 	
@@ -136,4 +132,4 @@ def ci(self, cosmo, data, red2):
 		D[iz] = cosmo.scale_independent_growth_factor(redshift[iz])
 		
 	
-	return redshift, m[0], h, d_tot, T_cb, pk, f, D
+	return redshift, znumber, m[0], h, d_tot, T_cb, kclass, pk, f, D
