@@ -46,7 +46,7 @@ def cimp(self, cosmo, data):
 	if m[0] not in mv:
 		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
 
-	print 'The total neutrino mass is '+str(m[0])
+	#~ print 'The total neutrino mass is '+str(m[0])
 
 	####################################################################
 	#### Store the selected redshifts in a array and deduce its length for the loops

@@ -5,7 +5,9 @@
 
 from classy import Class
 from matplotlib.colors import LogNorm
+from scipy.interpolate import interp1d
 from cimp import cimp
+from tuning import tuning
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
 from pt_coeff import ptcoeff
@@ -43,7 +45,7 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 	####################################################################
 	#### import classy results
 	redshift, znumber, mv, h, d_tot, T_cb, kclass, pk, f, D = cimp(self, cosmo, data)
-
+	
 	####################################################################
 	#### compute the fog multipole coefficient if requested
 	if fog:
@@ -61,24 +63,63 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None):
 		
 		# tinker effective bias
 		bcc = lscoeff(self,data, mv,Massbins)[1]
-					
+
+		#### get the pt coefficients computed with FAST-PT
+		A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt = ptcoeff(self, data, k, Massbins)
+		Pmod_dtbis = np.zeros((len(k),znumber))
+		Pmod_ttbis = np.zeros((len(k),znumber))
+		# interpolate on redshift
+		for ik in xrange(len(k)):
+			f1 = interp1d(red2, Pmod_dt[ik,:], kind='cubic', fill_value='extrapolate')
+			f2 = interp1d(red2, Pmod_tt[ik,:], kind='cubic', fill_value='extrapolate')
+			Pmod_dtbis[ik,:] = f1(redshift)
+			Pmod_ttbis[ik,:] = f2(redshift)
+
 		# compute the total matter bias bmm w.r.t bcc using formula 5 in Raccanelli et al.
-		bmm = np.zeros((len(k),l2, len(Massbins)), 'float64')
+		bmm = np.zeros((len(kclass),l2, len(Massbins)), 'float64')
 		for iz in xrange(l2):
 			for count,j in enumerate(Massbins):
 				bmm[:,iz, count] = bcc[iz,count] * (T_cb[:,iz]/d_tot[:,iz])
 				
-		print np.shape(bmm)
+		# rescale the k and power spectrum because of classy/class difference
+		kclass /= h
+		#~ Phh *= h**3
+		
+		# cut the arrays on selected k and interpolate on z				
+		kclass, bmm = tuning(self, kclass, bmm, redshift, znumber, case, Massbins)
+		
+		
 
 		# Compute the halo Power spectrum in real space
 		if RSD == 0:
-			print 'you chose Kaiser model'
+			print 'you chose the Kaiser model'
 			dim = np.shape(P_halo)
 			Pred = np.zeros(dim)
 			for iz in xrange(znumber):
 				for count,j in enumerate(Massbins):
-					ind2 = mbins.index(j)
+					#~ ind2 = mbins.index(j)
 					Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz] + 1/5.*f[iz]**2
+		elif RSD == 1:
+			print 'you chose the Scoccimaro model'
+			dim = np.shape(P_halo)
+			Pred = np.zeros(dim)
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					#~ ind2 = mbins.index(j)
+					Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dtbis[:,iz]\
+					+ 1/5.*f[iz]**2*Pmod_ttbis[:,iz]
+		elif RSD == 2:
+			print 'you chose the TNS model'
+			dim = np.shape(P_halo)
+			Pred = np.zeros(dim)
+			for iz in xrange(znumber):
+				for count,j in enumerate(Massbins):
+					#~ ind2 = mbins.index(j)
+					Pred[:,iz,count] = P_halo[:,iz,count]  + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dtbis[:,iz]\
+					+ 1/5.*f[iz]**2*Pmod_ttbis[:,iz] + 1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8
+		elif RSD == 3:
+			raise ValueError('Not available for the linear model sorry')
+		
 
 		return k, Pred
 	#---------------------------------------------------------------

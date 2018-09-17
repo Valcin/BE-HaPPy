@@ -2,6 +2,7 @@
 from classy import Class
 from matplotlib.colors import LogNorm
 from scipy.interpolate import interp1d
+from tuning import tuning
 from cimp import cimp
 from bcoeff import bcoeff
 from ls_coeff import lscoeff
@@ -61,22 +62,12 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 	#-------------------------------------------------------------------
 	if model =='pl':
 		b1, b2, b3, b4 = bcoeff(self, data, model, case, Massbins)
-	
-	####################################################################
-	#### select the k mode according to the ones in Raccanelli et al. 2017
-	k_article = [0.35,0.2,0.15]
-	
-	if case == 1:
-		kmax = k_article[0]
-	elif case == 2:
-		kmax = k_article[1]
-	elif case == 3:
-		kmax = k_article[2]
-		
-			
+				
 	####################################################################
 	#### import classy results
 	redshift, znumber, mv, h, d_tot, T_cb, kclass, pk, f, D = cimp(self, cosmo, data)
+	
+	print 'The total neutrino mass is '+str(mv)
 	
 	####################################################################
 	###### compute the power spectrum with linear bias
@@ -104,43 +95,10 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 		kclass /= h
 		Phh *= h**3
 		
-		# create a scale array limited by kmin and kmax
-		try:
-			self.kmax
-		except:
-			self.kmax = False
-		if self.kmax and self.kmax < kmax:
-			lim_h = np.where(kclass <= self.kmax)[0]
-		else:
-			lim_h = np.where(kclass <= kmax)[0]
-
-		klim_h = np.amax(lim_h) # define the higher limit
-		
-		#-------------------------------------------------------------------
-		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
-		kmin = 2 * math.pi * Vs**(-1/3.)
-		
-		try:
-			self.kmin
-		except:
-			self.kmin = False
-
-		if self.kmin and self.kmin > kmin:
-			lim_l = np.where(kclass >= self.kmin)[0]
-		else:
-			lim_l = np.where(kclass >= kmin)[0]
-		#------------------------------------------------------------------
-		##### =====> 
-		kclass = kclass[lim_l[0]:klim_h+1]
-		Phh = Phh[lim_l[0]:klim_h+1]
-		
-		# interpolate on selected redshift
-		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
-		for j in xrange(len(Massbins)):
-			for ik in xrange(len(kclass)):
-				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
-				Phhbis[ik,:,j] = f(redshift)
+		# cut the arrays on selected k and interpolate on z				
+		kclass, Phhbis = tuning(self, kclass, Phh, redshift, znumber, case, Massbins)
 				
+		# give the error if selected
 		if err == True:
 			if mv == 0.0 or mv == 0.15:
 				error.error(self, data, kclass, Phhbis, redshift, mv, Massbins)
@@ -188,43 +146,10 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 		kclass /= h
 		Phh *= h**3
 		
-		# create a scale array limited by kmin and kmax
-		try:
-			self.kmax
-		except:
-			self.kmax = False
-		if self.kmax and self.kmax < kmax:
-			lim_h = np.where(kclass <= self.kmax)[0]
-		else:
-			lim_h = np.where(kclass <= kmax)[0]
-
-		klim_h = np.amax(lim_h) # define the higher limit
-		
-		#-------------------------------------------------------------------
-		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
-		kmin = 2 * math.pi * Vs**(-1/3.)
-		
-		try:
-			self.kmin
-		except:
-			self.kmin = False
-
-		if self.kmin and self.kmin > kmin:
-			lim_l = np.where(kclass >= self.kmin)[0]
-		else:
-			lim_l = np.where(kclass >= kmin)[0]
-		#------------------------------------------------------------------
-		##### =====> 
-		kclass = kclass[lim_l[0]:klim_h+1]
-		Phh = Phh[lim_l[0]:klim_h+1]
-		
-		#~ # interpolate on selected redshift
-		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
-		for j in xrange(len(Massbins)):
-			for ik in xrange(len(kclass)):
-				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
-				Phhbis[ik,:,j] = f(redshift)
+		# cut the arrays on selected k and interpolate on z				
+		kclass, Phhbis = tuning(self, kclass, Phh, redshift, znumber, case, Massbins)
 				
+		# give the error if selected
 		if err == True:
 			if mv == 0.0 or mv == 0.15:
 				error.error(self, data, kclass, Phhbis, redshift, mv, Massbins)
@@ -263,44 +188,10 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 				for count,j in enumerate(Massbins):
 					PhhDD[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
 		
-		# create a scale array limited by kmin and kmax
-
-		try:
-			self.kmax
-		except:
-			self.kmax = False
-		if self.kmax and self.kmax < kmax:
-			lim_h = np.where(kclass <= self.kmax)[0]
-		else:
-			lim_h = np.where(kclass <= kmax)[0]
-
-		klim_h = np.amax(lim_h) # define the higher limit
-		
-		#-------------------------------------------------------------------
-		Vs = 1000**3 # for a periodic box of 1000 h-1Mpc
-		kmin = 2 * math.pi * Vs**(-1/3.)
-		
-		try:
-			self.kmin
-		except:
-			self.kmin = False
-
-		if self.kmin and self.kmin > kmin:
-			lim_l = np.where(kclass >= self.kmin)[0]
-		else:
-			lim_l = np.where(kclass >= kmin)[0]
-		#------------------------------------------------------------------
-		##### =====> 
-		kclass = kclass[lim_l[0]:klim_h+1]
-		PhhDD = PhhDD[lim_l[0]:klim_h+1]
-		
-		# interpolate on selected redshift
-		PhhDDbis = np.zeros((len(kclass),znumber,len(Massbins)))
-		for j in xrange(len(Massbins)):
-			for ik in xrange(len(kclass)):
-				f = interp1d(red2, PhhDD[ik,:,j], kind='cubic', fill_value='extrapolate')
-				PhhDDbis[ik,:,j] = f(redshift)
+		# cut the arrays on selected k and interpolate on z				
+		kclass, PhhDDbis = tuning(self, kclass, PhhDD, redshift, znumber, case, Massbins)
 				
+		# give the error if selected
 		if err == True:
 			if mv == 0.0 or mv == 0.15:
 				error.error(self, data, kclass, PhhDDbis, redshift, mv, Massbins)
