@@ -12,7 +12,7 @@ import csv
 import sys
 
 
-def tuning(self, kclass, Phh, redshift, znumber, case, Massbins):
+def tuning(self, kclass, Phh, redshift, znumber, case, Massbins, dim):
 	####################################################################
 	#### select the k mode according to the ones in Raccanelli et al. 2017
 	k_article = [0.35,0.2,0.15]
@@ -62,10 +62,17 @@ def tuning(self, kclass, Phh, redshift, znumber, case, Massbins):
 
 	####################################################################
 	#### interpolate on selected redshift
-	Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
-	for j in xrange(len(Massbins)):
+	
+	if dim == '2d':
+		Phhbis = np.zeros((len(kclass),znumber))
 		for ik in xrange(len(kclass)):
-			f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
-			Phhbis[ik,:,j] = f(redshift)
+			f = interp1d(red2, Phh[ik,:], kind='cubic', fill_value='extrapolate')
+			Phhbis[ik,:] = f(redshift)
+	if dim == '3d':
+		Phhbis = np.zeros((len(kclass),znumber,len(Massbins)))
+		for j in xrange(len(Massbins)):
+			for ik in xrange(len(kclass)):
+				f = interp1d(red2, Phh[ik,:,j], kind='cubic', fill_value='extrapolate')
+				Phhbis[ik,:,j] = f(redshift)
 			
 	return kclass, Phhbis

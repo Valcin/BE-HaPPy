@@ -96,7 +96,7 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 		Phh *= h**3
 		
 		# cut the arrays on selected k and interpolate on z				
-		kclass, Phhbis = tuning(self, kclass, Phh, redshift, znumber, case, Massbins)
+		kclass, Phhbis = tuning(self, kclass, Phh, redshift, znumber, case, Massbins,'3d')
 				
 		# give the error if selected
 		if err == True:
@@ -147,7 +147,7 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 		Phh *= h**3
 		
 		# cut the arrays on selected k and interpolate on z				
-		kclass, Phhbis = tuning(self, kclass, Phh, redshift, znumber, case, Massbins)
+		kclass, Phhbis = tuning(self, kclass, Phh, redshift, znumber, case, Massbins,'3d')
 				
 		# give the error if selected
 		if err == True:
@@ -169,7 +169,6 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 		
 		# compute the halo power spectrum given the coefficient
 		PhhDD = np.zeros((len(kclass),l2,len(Massbins)))
-		PhhDT = np.zeros((len(kclass),l2,len(Massbins)))
 		for iz in xrange(l2):
 			for count,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
@@ -177,9 +176,7 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 				PhhDD[:,iz,count] = b1[iz,count]**2*Pmod_dd[:,iz] + b1[iz,count]*b2[iz,count]*A[:,iz] + 1/4.*b2[iz,count]**2*B[:,iz] + \
 				b1[iz,count]*bs[iz,count]*C[:,iz] + 1/2.*b2[iz,count]*bs[iz,count]*D[:,iz] + 1/4.*bs[iz,count]**2*E[:,iz] +\
 				2*b1[iz,count]*b3nl[iz,count]*F[:,iz] #* (T_cb[:,iz]/d_tot[:,iz])**2
-				# cross velocity spectrum
-				#~ PhhDT[:,iz,count] = b1[iz,count]* Pmod_dt[:,iz] + b2[iz,count]*G[:,iz] + bs[iz,count]*H[:,iz] + b3nl[iz,count]*F[:,iz] \
-				#~ *(T_cb[:,iz]/d_tot[:,iz])
+
 		
 		bcc_LS000 = lscoeff(self,data, mv,Massbins)[0]
 		bcc_LSmassive = lscoeff(self,data, mv,Massbins)[1]
@@ -189,7 +186,7 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 					PhhDD[:,iz,count] *= bcc_LSmassive[iz,count]/bcc_LS000[iz,count]
 		
 		# cut the arrays on selected k and interpolate on z				
-		kclass, PhhDDbis = tuning(self, kclass, PhhDD, redshift, znumber, case, Massbins)
+		kclass, PhhDDbis = tuning(self, kclass, PhhDD, redshift, znumber, case, Massbins, '3d')
 				
 		# give the error if selected
 		if err == True:
