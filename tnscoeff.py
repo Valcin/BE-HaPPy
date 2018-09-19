@@ -14,7 +14,7 @@ import sys
 
 
 
-def tnscoeff(self, data, case, kclass, Massbins):
+def tnscoeff(self, data, model, kclass, Massbins):
        
 	####################################################################
     #### Store the redshifts where bcc fit  and bcc Ls are available in arrays
@@ -36,7 +36,7 @@ def tnscoeff(self, data, case, kclass, Massbins):
 	AB6 = np.zeros((350,l2,len(Massbins)))
 	AB8 = np.zeros((350,l2,len(Massbins)))
 	
-	if case == 'lin':
+	if model == 'lin':
 		for count,iz in enumerate(red2):
 			for count2,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
@@ -44,36 +44,36 @@ def tnscoeff(self, data, case, kclass, Massbins):
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_lin1_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 1:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_lin2_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 2:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_lin3_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 3:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_lin4_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 	#-------------------------------------------------------------------
-	if case == 'pl':
+	if model == 'pl':
 		for count,iz in enumerate(red2):
 			for count2,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
@@ -81,36 +81,36 @@ def tnscoeff(self, data, case, kclass, Massbins):
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pl1_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 1:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pl2_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 2:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pl3_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 3:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pl4_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 	#-------------------------------------------------------------------
-	if case == 'exp':
+	if model == 'exp':
 		for count,iz in enumerate(red2):
 			for count2,j in enumerate(Massbins):
 				ind2 = mbins.index(j)
@@ -118,34 +118,34 @@ def tnscoeff(self, data, case, kclass, Massbins):
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pt1_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 1:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pt2_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 2:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pt3_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 				elif ind2 == 3:
 					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
 					'/TNS_coeff/tns_pt4_z='+str(iz)+'.txt')
 					f = np.loadtxt(dat_file_path)
-					AB2[:,iz,count2] = f[:,0]
-					AB4[:,iz,count2] = f[:,1]
-					AB6[:,iz,count2] = f[:,2]
-					AB8[:,iz,count2] = f[:,3]
+					AB2[:,count,count2] = f[:,0]
+					AB4[:,count,count2] = f[:,1]
+					AB6[:,count,count2] = f[:,2]
+					AB8[:,count,count2] = f[:,3]
 		
 			
 	### interpolate the pt coeff on the chosen scale
