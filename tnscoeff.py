@@ -36,6 +36,43 @@ def tnscoeff(self, data, case, kclass, Massbins):
 	AB6 = np.zeros((350,l2,len(Massbins)))
 	AB8 = np.zeros((350,l2,len(Massbins)))
 	
+	if case == 'lin':
+		for count,iz in enumerate(red2):
+			for count2,j in enumerate(Massbins):
+				ind2 = mbins.index(j)
+				if ind2 == 0:
+					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
+					'/TNS_coeff/tns_lin1_z='+str(iz)+'.txt')
+					f = np.loadtxt(dat_file_path)
+					AB2[:,iz,count2] = f[:,0]
+					AB4[:,iz,count2] = f[:,1]
+					AB6[:,iz,count2] = f[:,2]
+					AB8[:,iz,count2] = f[:,3]
+				elif ind2 == 1:
+					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
+					'/TNS_coeff/tns_lin2_z='+str(iz)+'.txt')
+					f = np.loadtxt(dat_file_path)
+					AB2[:,iz,count2] = f[:,0]
+					AB4[:,iz,count2] = f[:,1]
+					AB6[:,iz,count2] = f[:,2]
+					AB8[:,iz,count2] = f[:,3]
+				elif ind2 == 2:
+					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
+					'/TNS_coeff/tns_lin3_z='+str(iz)+'.txt')
+					f = np.loadtxt(dat_file_path)
+					AB2[:,iz,count2] = f[:,0]
+					AB4[:,iz,count2] = f[:,1]
+					AB6[:,iz,count2] = f[:,2]
+					AB8[:,iz,count2] = f[:,3]
+				elif ind2 == 3:
+					dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV'\
+					'/TNS_coeff/tns_lin4_z='+str(iz)+'.txt')
+					f = np.loadtxt(dat_file_path)
+					AB2[:,iz,count2] = f[:,0]
+					AB4[:,iz,count2] = f[:,1]
+					AB6[:,iz,count2] = f[:,2]
+					AB8[:,iz,count2] = f[:,3]
+	#-------------------------------------------------------------------
 	if case == 'pl':
 		for count,iz in enumerate(red2):
 			for count2,j in enumerate(Massbins):

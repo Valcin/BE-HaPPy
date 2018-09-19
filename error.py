@@ -48,23 +48,17 @@ def error(self,data, kclass, P_halo, redshift, mv, Massbins):
 	mbins = ['M1', 'M2', 'M3', 'M4']
 	
 	if mv == 0.0:
-		cpart1 = '/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='
-		cpart2 = '/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='
-		cpart3 = '/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='
-		cpart4 = '/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='
-		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(2.0)+'.txt')
-		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(2.0)+'.txt')
-		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(2.0)+'.txt')
-		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(2.0)+'.txt')
+		cpart1 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.0eV/Phh1_realisation_z='
+		cpart2 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.0eV/Phh2_realisation_z='
+		cpart3 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.0eV/Phh3_realisation_z='
+		cpart4 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.0eV/Phh4_realisation_z='
+		
 	elif mv == 0.15:
-		cpart1 = '/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_0.15_z='
-		cpart2 = '/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_0.15_z='
-		cpart3 = '/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_0.15_z='
-		cpart4 = '/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_0.15_z='
-		#~ d1 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d2 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d3 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_0.15_z='+str(2.0)+'.txt')
-		#~ d4 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_0.15_z='+str(2.0)+'.txt')
+		cpart1 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.15eV/Phh1_realisation_0.15_z='
+		cpart2 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.15eV/Phh2_realisation_0.15_z='
+		cpart3 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.15eV/Phh3_realisation_0.15_z='
+		cpart4 = '/home/david/codes/montepython_public/BE_HaPPy/coefficients/simu_ps/0.15eV/Phh4_realisation_0.15_z='
+		
 	
 	####################################################################
 	d1 = np.loadtxt(cpart1+str(0.0)+'.txt')
