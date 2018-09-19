@@ -44,12 +44,22 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None, err = No
 	####################################################################
 	#### compute the fog multipole coefficient if requested
 	if fog:
-		kappa = k*(data.mcmc_parameters['sigma_v']['current']*data.mcmc_parameters['sigma_v']['scale'])
-		coeffA = math.sqrt(math.pi)/2. * erf(kappa)/kappa
-		coeffB = 3./2./kappa**2*(coeffA - np.exp(-kappa**2))
-		coeffC = 5./2./kappa**2*(coeffB - np.exp(-kappa**2))
-		coeffD = 7./2./kappa**2*(coeffC - np.exp(-kappa**2))
-		coeffE = 9./2./kappa**2*(coeffD - np.exp(-kappa**2))
+		# get the selected k array
+		k, P_halo = Halo(self, cosmo, data, 'lin', case, Massbins)
+		kappa = np.zeros((len(k), znumber))
+		coeffA = np.zeros((len(k), znumber))
+		coeffB = np.zeros((len(k), znumber))
+		coeffC = np.zeros((len(k), znumber))
+		coeffD = np.zeros((len(k), znumber))
+		coeffE = np.zeros((len(k), znumber))
+
+		for iz in xrange(znumber):
+			kappa[:,iz] = k*(data.mcmc_parameters['sigma_v']['current']*data.mcmc_parameters['sigma_v']['scale'])*f[iz]*D[iz]
+			coeffA[:,iz] = np.arctan(kappa[:,iz]/math.sqrt(2))/(math.sqrt(2)*kappa[:,iz]) + 1/(2+kappa[:,iz]**2)
+			coeffB[:,iz] = 6/kappa[:,iz]**2*(coeffA[:,iz] - 2/(2+kappa[:,iz]**2))
+			coeffC[:,iz] = -10/kappa[:,iz]**2*(coeffB[:,iz] - 2/(2+kappa[:,iz]**2))
+			coeffD[:,iz] = -2/3./kappa[:,iz]**2*(coeffC[:,iz] - 2/(2+kappa[:,iz]**2))
+			coeffE[:,iz] = -4/10./kappa[:,iz]**2*(7.*coeffD[:,iz] - 2/(2+kappa[:,iz]**2))
 	
 	####################################################################
 	if model == 'lin':
@@ -94,20 +104,21 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None, err = No
 				print 'you chose the Kaiser model'
 				for iz in xrange(znumber):
 					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA + 2/3.*bmm[:,iz, count]*f[iz]*coeffB + 1/5.*f[iz]**2*coeffC
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*coeffC[:,iz]
 			elif RSD == 1:
 				print 'you chose the Scoccimaro model'
 				for iz in xrange(znumber):
 					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz]
 			elif RSD == 2:
 				print 'you chose the TNS model'
 				for iz in xrange(znumber):
 					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC + 1/3.*AB2[:,iz,count]*coeffB + 1/5.*AB4[:,iz,count]*coeffC \
-						+ 1/7.*AB6[:,iz,count]*coeffD + 1/9.*AB8[:,iz,count]*coeffE
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
 			elif RSD == 3:
 				raise ValueError('Not available for the linear model sorry')
 		#------------
@@ -202,20 +213,21 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None, err = No
 				print 'you chose the Kaiser model'
 				for iz in xrange(znumber):
 					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA + 2/3.*bmm[:,iz, count]*f[iz]*coeffB + 1/5.*f[iz]**2*coeffC
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*coeffC[:,iz]
 			elif RSD == 1:
 				print 'you chose the Scoccimaro model'
 				for iz in xrange(znumber):
 					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz]
 			elif RSD == 2:
 				print 'you chose the TNS model'
 				for iz in xrange(znumber):
 					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC + 1/3.*AB2[:,iz,count]*coeffB + 1/5.*AB4[:,iz,count]*coeffC \
-						+ 1/7.*AB6[:,iz,count]*coeffD + 1/9.*AB8[:,iz,count]*coeffE
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
 			elif RSD == 3:
 				raise ValueError('Not available for the linear model sorry')
 		#------------
@@ -303,39 +315,39 @@ def rspec(self, cosmo, data, model, case, Massbins, RSD=None, fog=None, err = No
 		#------------
 		if fog :
 			if RSD == 0:
-			raise ValueError('Not available for the PT expansion model sorry')
-		elif RSD == 1:
-			raise ValueError('Not available for the PT expansion model sorry')
-		elif RSD == 2:
-			raise ValueError('Not available for the PT expansion model sorry')
-		elif RSD == 3:
-			print 'you chose the eTNS model'
-			dim = np.shape(P_halo)
-			Pred = np.zeros(dim)
-			for iz in xrange(znumber):
-				for count,j in enumerate(Massbins):
-					#~ ind2 = mbins.index(j)
-					Pred[:,iz,count] = P_halo[:,iz,count]*coeffA  + 2/3.*f[iz]*PhhDT[:,iz,count]*coeffB \
-					+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC + 1/3.*AB2[:,iz,count]*coeffB + 1/5.*AB4[:,iz,count]*coeffC \
-					+ 1/7.*AB6[:,iz,count]*coeffD + 1/9.*AB8[:,iz,count]*coeffE
+				raise ValueError('Not available for the PT expansion model sorry')
+			elif RSD == 1:
+				raise ValueError('Not available for the PT expansion model sorry')
+			elif RSD == 2:
+				raise ValueError('Not available for the PT expansion model sorry')
+			elif RSD == 3:
+				print 'you chose the eTNS model'
+				dim = np.shape(P_halo)
+				Pred = np.zeros(dim)
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						#~ ind2 = mbins.index(j)
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz]  + 2/3.*f[iz]*PhhDT[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
 		#------------
 		else:
 			if RSD == 0:
-			raise ValueError('Not available for the PT expansion model sorry')
-		elif RSD == 1:
-			raise ValueError('Not available for the PT expansion model sorry')
-		elif RSD == 2:
-			raise ValueError('Not available for the PT expansion model sorry')
-		elif RSD == 3:
-			print 'you chose the eTNS model'
-			dim = np.shape(P_halo)
-			Pred = np.zeros(dim)
-			for iz in xrange(znumber):
-				for count,j in enumerate(Massbins):
-					#~ ind2 = mbins.index(j)
-					Pred[:,iz,count] = P_halo[:,iz,count]  + 2/3.*f[iz]*PhhDT[:,iz,count] \
-					+ 1/5.*f[iz]**2*Pmod_tt[:,iz] + 1/3.*AB2[:,iz,count]+ 1/5.*AB4[:,iz,count]\
-					+ 1/7.*AB6[:,iz,count]+ 1/9.*AB8[:,iz,count]
+				raise ValueError('Not available for the PT expansion model sorry')
+			elif RSD == 1:
+				raise ValueError('Not available for the PT expansion model sorry')
+			elif RSD == 2:
+				raise ValueError('Not available for the PT expansion model sorry')
+			elif RSD == 3:
+				print 'you chose the eTNS model'
+				dim = np.shape(P_halo)
+				Pred = np.zeros(dim)
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						#~ ind2 = mbins.index(j)
+						Pred[:,iz,count] = P_halo[:,iz,count]  + 2/3.*f[iz]*PhhDT[:,iz,count] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz] + 1/3.*AB2[:,iz,count]+ 1/5.*AB4[:,iz,count]\
+						+ 1/7.*AB6[:,iz,count]+ 1/9.*AB8[:,iz,count]
 		
 		
 		# give the error if selected
