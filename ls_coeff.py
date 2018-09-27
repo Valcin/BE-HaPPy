@@ -32,6 +32,8 @@ def lscoeff(self, data, mv, Massbins):
 
 	####################################################################
 	#### get the rescaling coefficients according to neutrino mass
+	#### if you want to change the large sclae bias from Tinker to Crocce + ST 
+	#### change the line 'LS_z='+str(i)+'_.txt' in 'LS2_z='+str(i)+'_.txt'
 	bcc_LS000 = np.zeros((l2,len(Massbins)))
 	for i in red2:
 		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/0.0eV/large_scale/'\
