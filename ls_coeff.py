@@ -120,4 +120,4 @@ def lscoeff(self, data, mv, Massbins):
 		elif mv == 0.30:
 			return bcc_LS000, bcc_LS030
 		
-		
+		bias_eff0_t1=np.sum(hmf[bin1]*dm[bin1]*bt[bin1])/np.sum(dm[bin1]*hmf[bin1])
