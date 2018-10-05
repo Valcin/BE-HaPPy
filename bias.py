@@ -51,18 +51,6 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 	#### Store the mass bins available in an array
 	mbins = ['M1', 'M2', 'M3', 'M4']
 
-	
-	####################################################################
-	#### get the coefficients from the dat files in the data directory 
-
-	#-------------------------------------------------------------------
-	if model =='exp':
-		b1, b2, bs, b3nl = bcoeff(self, data, model, case, Massbins)
-
-	#-------------------------------------------------------------------
-	if model =='pl':
-		b1, b2, b3, b4 = bcoeff(self, data, model, case, Massbins)
-				
 	####################################################################
 	#### import classy results
 	redshift, znumber, mv, h, d_tot, T_cb, kclass, pk, f, D = cimp(self, cosmo, data)
@@ -112,6 +100,9 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 
 
 	elif model == 'pl':
+		# get the coefficients from the dat files in the data directory 
+		b1, b2, b3, b4 = bcoeff(self, data, model, case, Massbins)
+		
 		bcc = np.zeros((len(kclass), l2, len(Massbins)), 'float64')
 		for iz in xrange(l2):
 			for count,j in enumerate(Massbins):
@@ -164,6 +155,8 @@ def Halo(self, cosmo, data, model, case, Massbins, err = None):
 
 
 	elif model == 'exp':
+		# get the coefficients from the dat files in the data directory 
+		b1, b2, bs, b3nl = bcoeff(self, data, model, case, Massbins)
 		
 		A,B,C,D,E,F,G,H,Pmod_dd,_,_ = ptcoeff(self, data, kclass, Massbins)		
 		
