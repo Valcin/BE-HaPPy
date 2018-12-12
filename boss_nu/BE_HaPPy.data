@@ -1,0 +1,15 @@
+### New likelihood to compute neutrino mass with boss data
+boss_nu.data_directory = data.path['data']
+
+
+boss_nu.use_nuisance = ['A_shot','sigma_v', 'b1', 'b2']
+
+# integration boundaries for k (in h/Mpc)
+boss_nu.kmin = 0.001
+boss_nu.kmax = 0.15
+
+boss_nu.kbins = 60
+
+# range of redshifts covered by survey.
+boss_nu.z = 0.5
+boss_nu.zmax = 2

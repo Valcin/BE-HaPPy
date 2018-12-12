@@ -66,7 +66,7 @@ def lscoeff(self, data, mv, Massbins):
 	#------------------------------
 	bcc_LS010 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.10/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.1/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
@@ -96,28 +96,45 @@ def lscoeff(self, data, mv, Massbins):
 	#------------------------------
 	bcc_LS030 = np.zeros((l2,len(Massbins)))
 	for i in red2:
-		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.30/'\
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.3/'\
 		'LS_z='+str(i)+'_.txt')
 		f = np.loadtxt(dat_file_path)
 		ind = red2.index(i)
 		for count,j in enumerate(Massbins):
 			ind2 = mbins.index(j)
 			bcc_LS030[ind,count] = f[ind2]
+	#------------------------------
+	bcc_LS045 = np.zeros((l2,len(Massbins)))
+	for i in red2:
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.45/'\
+		'LS_z='+str(i)+'_.txt')
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS045[ind,count] = f[ind2]
+	#------------------------------
+	bcc_LS060 = np.zeros((l2,len(Massbins)))
+	for i in red2:
+		dat_file_path = os.path.join(self.data_directory, 'BE_HaPPy/coefficients/other neutrinos masses/0.6/'\
+		'LS_z='+str(i)+'_.txt')
+		f = np.loadtxt(dat_file_path)
+		ind = red2.index(i)
+		for count,j in enumerate(Massbins):
+			ind2 = mbins.index(j)
+			bcc_LS060[ind,count] = f[ind2]
 
 	###############################################################
-		if mv == 0.0:
-			return bcc_LS000, bcc_LS000
-		if mv == 0.03:
-			return bcc_LS000, bcc_LS003
-		elif mv == 0.06:
-			return bcc_LS000, bcc_LS006
-		elif mv == 0.10:
-			return bcc_LS000, bcc_LS010
-		elif mv == 0.13:
-			return bcc_LS000, bcc_LS013
-		elif mv == 0.15:
-			return bcc_LS000, bcc_LS015
-		elif mv == 0.30:
-			return bcc_LS000, bcc_LS030
-		
-		bias_eff0_t1=np.sum(hmf[bin1]*dm[bin1]*bt[bin1])/np.sum(dm[bin1]*hmf[bin1])
+	av_mass = [0.0,0.03,0.06,0.10,0.13,0.15,0.30,0.45,0.60]
+	dim = np.shape(bcc_LS000)
+	bcc_LSmassive = np.zeros((dim[0],dim[1]))
+	for m in xrange(0, dim[0]):
+		for n in xrange(0, dim[1]):
+			bvalue = [bcc_LS000[m,n],bcc_LS003[m,n],bcc_LS006[m,n],bcc_LS010[m,n],bcc_LS013[m,n],bcc_LS015[m,n],\
+			bcc_LS030[m,n],bcc_LS045[m,n],bcc_LS060[m,n]]
+			fLS = interp1d(av_mass, bvalue)
+			bcc_LSmassive[m,n] = fLS(mv)
+			
+	return bcc_LS000, bcc_LSmassive
+
+

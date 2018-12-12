@@ -42,9 +42,8 @@ def cimp(self, cosmo, data):
 	m = cosmo.get_current_derived_parameters(['m_ncdm_tot'])
 	m = m.values()
 	m = [ round(elem, 2) for elem in m ]
-	mv = [0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30]
-	if m[0] not in mv:
-		raise ValueError('Sorry the code is only available for Mv = 0.0, 0.03, 0.06, 0.10, 0.13, 0.15, 0.30 and your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
+	if m[0] < 0 or m[0] > 0.60:
+		raise ValueError('Sorry the code is only available for Mv = [0.0 - 0.60] your Mv is '+str(m[0])+'. Please modify you total neutrino mass.')
 
 	#~ print 'The total neutrino mass is '+str(m[0])
 
