@@ -13,6 +13,7 @@ import sys
 sys.path.append('/home/david/codes/FAST-PT')
 import myFASTPT as FPT
 
+
 class BE_HaPPy(Likelihood):
 	def __init__(self, path, data, command_line):
 
@@ -26,9 +27,23 @@ class BE_HaPPy(Likelihood):
 		#~ #-------------------------------------------------
 		#~ #---------------- Data ---------------------------
 		#~ #-------------------------------------------------
-		camb = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/CAMB/Pk_cb_z=0.500.txt')
-		self.kcamb = camb[:,0]
-		self.Pcamb = camb[:,1]
+		Class = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class/test_z2_pk.dat')
+		self.kclass = Class[:,0]
+		self.Pclass = Class[:,1]
+		
+		#### load halo redshift space ps
+		### for test
+		self.data_directory = data.path['root']
+		print self.data_directory
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/codes/analysis')
+		sys.path.append(dat_file_path)
+		from load_data import ld_data
+		kcamb, Pcamb, k, Pmm, PH1, PH2, PH3 , PH4, errPhh1, errPhh2, errPhh3, errPhh4, bias1, bias2, bias3, bias4, \
+		bias1s, bias2s, bias3s, bias4s, errb1, errb2, errb3, errb4, Pmono1, Pmono2, Pmono3, Pmono4, errPr1, errPr2, errPr3,\
+		errPr4, kclass, Tm, Tcb, noise1, noise2, noise3, noise4 = ld_data(0.15, [0.0,0.5,1.0,2.0], 1)
+		
+		self.ksimu = k
+		self.Psimu = Pmono1
 		#~ THINK OF HST PRIORS
 		# Else the file will be created in the loglkl() function.
 		return
@@ -85,15 +100,15 @@ class BE_HaPPy(Likelihood):
 		redshift[:] = red
 
 		#### get the transfer function from class
-		kget = cosmo.get_transfer(self.z, output_format='camb')
-		kclass = kget.get('k (h/Mpc)')
-		d_b = np.zeros((len(kclass)), 'float64')
-		d_cdm = np.zeros((len(kclass)), 'float64')
-		d_tot = np.zeros((len(kclass)), 'float64')
-		transfer = cosmo.get_transfer(self.z)
-		d_b = transfer.get('d_b')
-		d_cdm = transfer.get('d_cdm')
-		d_tot = transfer.get('d_tot')
+		#~ kget = cosmo.get_transfer(self.z, output_format='camb')
+		#~ kclass = kget.get('k (h/Mpc)')
+		#~ d_b = np.zeros((len(kclass)), 'float64')
+		#~ d_cdm = np.zeros((len(kclass)), 'float64')
+		#~ d_tot = np.zeros((len(kclass)), 'float64')
+		#~ transfer = cosmo.get_transfer(self.z)
+		#~ d_b = transfer.get('d_b')
+		#~ d_cdm = transfer.get('d_cdm')
+		#~ d_tot = transfer.get('d_tot')
 		
 		#### import Omega_b and Omega_cdm from class. Remember to add Omega_cdm in classy and recompile after
 		Omega_b = cosmo.Omega_b()
@@ -101,31 +116,28 @@ class BE_HaPPy(Likelihood):
 		Omega_m = cosmo.Omega_m()
 		h = cosmo.h()
 		
-		
-		print np.min(kclass), np.max(kclass)
-		print np.min(self.kcamb), np.max(self.kcamb)
-		#~ kill
-		
 		#### get the linear power spectrum from class
 		#~ pk_lin = np.zeros((len(kclass)), 'float64')
 		#~ for ik in xrange(len(kclass)):
 			#~ pk_lin[ik] = cosmo.pk_lin(kclass[ik]*h, self.z)
-			
-		#### get the linear power spectrum from class
-		pk_lin = np.zeros((len(kclass)), 'float64')
-		#~ for ik in xrange(len(kclass)):
-		pk_lin = cosmo.get_pk_array(kclass*h, redshift, len(kclass), znumber, 0) #if we want Pmm
-		pk_lin = cosmo.get_pk_cb_array(kclass*h, redshift, len(kclass), znumber, 0) # if we want Pcb
+		
+		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
+		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
+		pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
+		#~ pk_lin = cosmo.get_pk_cb_array(kclass, redshift, len(kclass), znumber, 0) # if we want Pcb
 			
 		
-		
+		### compare classy amplitude with classy
 		import matplotlib.pyplot as plt
-		plt.plot(self.kcamb, self.Pcamb)
-		plt.plot(kclass, pk_lin*h**3)
-		plt.xscale('log')
-		plt.yscale('log')
-		plt.show()
-				
+		#~ plt.plot(self.kclass, self.Pclass, c='r')
+		#~ plt.plot(kbound, pk_lin*h**3, c='b')
+		#~ plt.xscale('log')
+		#~ plt.yscale('log')
+		#~ plt.show()
+		
+		### rescale the amplitude of pk_lin accoridngly
+		pk_lin *= h**3 
+		
 		#### get the non linear power spectrum from class
 		#~ pk = np.zeros((len(kbound)), 'float64')
 		#~ for ik in xrange(len(kbound)):
@@ -215,6 +227,16 @@ class BE_HaPPy(Likelihood):
 		Pred = np.zeros((len(kbound)))
 		Pred = PhhDD*coeffA  + 2/3.*f*PhhDT*coeffB + 1/5.*f**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
 		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE
+		
+		
+		inv_sigma2 = 1.0/(yerr[lim]**2)
+
+		### plot to test
+		plt.plot(self.ksimu, self.Psimu, c='r')
+		plt.plot(kbound, Pred, c='b')
+		plt.xscale('log')
+		plt.yscale('log')
+		plt.show()
 
 		end = time.time()
 		print 'total time is '+str((end - start))
