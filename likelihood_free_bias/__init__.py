@@ -23,12 +23,7 @@ class BE_HaPPy(Likelihood):
 		self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.9*self.kmax})
 		self.need_cosmo_arguments(data, {'non linear': 'halofit'})
 
-		#~ #-------------------------------------------------
-		#~ #---------------- Data ---------------------------
-		#~ #-------------------------------------------------
-		camb = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/CAMB/Pk_cb_z=0.500.txt')
-		self.kcamb = camb[:,0]
-		self.Pcamb = camb[:,1]
+
 		#~ THINK OF HST PRIORS
 		# Else the file will be created in the loglkl() function.
 		return
@@ -79,13 +74,18 @@ class BE_HaPPy(Likelihood):
 
 		#### Store the selected redshifts in a array and deduce its length for the loops
 		#### array manipulation because len() and size only work for znumber >1
-		red = np.array(redshift)
-		znumber = red.size 
+		a = np.array(redshift)
+		znumber = a.size 
 		redshift = np.zeros(znumber,'float64') 
-		redshift[:] = red
+		redshift[:] = a
+
+		#### Store the redshifts where bcc fit and bcc Ls are available in arrays
+		red2 = [0.0,0.5,1.0,2.0]
+		l2= len(red2)
+
 
 		#### get the transfer function from class
-		kget = cosmo.get_transfer(self.z, output_format='camb')
+		kget = cosmo.get_transfer(self.z)
 		kclass = kget.get('k (h/Mpc)')
 		d_b = np.zeros((len(kclass)), 'float64')
 		d_cdm = np.zeros((len(kclass)), 'float64')
@@ -94,42 +94,34 @@ class BE_HaPPy(Likelihood):
 		d_b = transfer.get('d_b')
 		d_cdm = transfer.get('d_cdm')
 		d_tot = transfer.get('d_tot')
-		
+			
+		#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
+		#### and Fast- PT requires a evenly sampled array in log scale 
+		#### we interpolate
+		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
+		d_b = np.interp(kbound, kclass,d_b)
+		d_cdm = np.interp(kbound, kclass,d_cdm)
+		d_tot = np.interp(kbound, kclass,d_tot)
+
 		#### import Omega_b and Omega_cdm from class. Remember to add Omega_cdm in classy and recompile after
 		Omega_b = cosmo.Omega_b()
 		Omega_cdm = cosmo.Omega_cdm()
 		Omega_m = cosmo.Omega_m()
 		h = cosmo.h()
-		
-		
-		print np.min(kclass), np.max(kclass)
-		print np.min(self.kcamb), np.max(self.kcamb)
-		#~ kill
+
+		#### define the CDM + baryons transfer function 
+		T_cb = np.zeros((len(kclass)), 'float64')
+		T_cb = (Omega_cdm * d_cdm + Omega_b * d_b)/(Omega_cdm + Omega_b)
 		
 		#### get the linear power spectrum from class
-		#~ pk_lin = np.zeros((len(kclass)), 'float64')
-		#~ for ik in xrange(len(kclass)):
-			#~ pk_lin[ik] = cosmo.pk_lin(kclass[ik]*h, self.z)
-			
-		#### get the linear power spectrum from class
-		pk_lin = np.zeros((len(kclass)), 'float64')
-		#~ for ik in xrange(len(kclass)):
-		pk_lin = cosmo.get_pk_array(kclass*h, redshift, len(kclass), znumber, 0) #if we want Pmm
-		pk_lin = cosmo.get_pk_cb_array(kclass*h, redshift, len(kclass), znumber, 0) # if we want Pcb
-			
-		
-		
-		import matplotlib.pyplot as plt
-		plt.plot(self.kcamb, self.Pcamb)
-		plt.plot(kclass, pk_lin*h**3)
-		plt.xscale('log')
-		plt.yscale('log')
-		plt.show()
+		pk_lin = np.zeros((len(kbound)), 'float64')
+		for ik in xrange(len(kbound)):
+			pk_lin[ik] = cosmo.pk_lin(kbound[ik], self.z)
 				
 		#### get the non linear power spectrum from class
-		#~ pk = np.zeros((len(kbound)), 'float64')
-		#~ for ik in xrange(len(kbound)):
-			#~ pk[ik] = cosmo.pk(kbound[ik], self.z)
+		pk = np.zeros((len(kbound)), 'float64')
+		for ik in xrange(len(kbound)):
+			pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
 		f = Omega_m**0.55

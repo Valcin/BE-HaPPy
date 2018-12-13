@@ -4,8 +4,9 @@ import numpy as np
 import warnings
 from numpy import newaxis as na
 from math import exp, log, pi, log10
-from BE_HaPPy.bias import Halo
-from BE_HaPPy.red_ps import rspec
+#~ sys.path.append('/home/david/codes/BE_HaPPy')
+#~ from BE_HaPPy.bias import Halo
+#~ from BE_HaPPy.red_ps import rspec
 import time
 import math
 import sys
@@ -23,7 +24,7 @@ class BE_HaPPy(Likelihood):
 		self.need_cosmo_arguments(data, {'non linear': 'halofit'})
 
 
-		THINK OF HST PRIORS
+		#~ THINK OF HST PRIORS
 		# Else the file will be created in the loglkl() function.
 		return
 
