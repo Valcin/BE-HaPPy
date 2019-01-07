@@ -18,10 +18,10 @@ need mpk, mtk, halofit, 'z_max_pk': self.zmax
 
 Redshift model
 ---------------
-0. for kaiser
-1. for scoccimarro
-2. for tns
-3. for etns (only available for exp is chosen)
+1. for kaiser
+2. for scoccimarro
+3. for tns
+4. for etns (only available for exp is chosen)
 
 fog
 -----
@@ -29,7 +29,3 @@ veldisp range taken for hector gil marin Perturbation theory approach for the po
 real space to massive haloes in redshift space
 euclid_pk.use_nuisance = ['P_shot','sigma_v']
 data.parameters['sigma_v'] = [6, 0, 12,0.01,1,'nuisance']
-
-my class
----------
-expalin i put my version of class
