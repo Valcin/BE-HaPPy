@@ -44,6 +44,8 @@ class BE_HaPPy(Likelihood):
 		
 		self.ksimu = k
 		self.Psimu = Pmono1
+		self.err = errPr1
+		
 		#~ THINK OF HST PRIORS
 		# Else the file will be created in the loglkl() function.
 		return
@@ -116,6 +118,8 @@ class BE_HaPPy(Likelihood):
 		Omega_m = cosmo.Omega_m()
 		h = cosmo.h()
 		
+		
+		print h, Omega_m
 		#### get the linear power spectrum from class
 		#~ pk_lin = np.zeros((len(kclass)), 'float64')
 		#~ for ik in xrange(len(kclass)):
@@ -144,8 +148,10 @@ class BE_HaPPy(Likelihood):
 			#~ pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
-		f = Omega_m**0.55
-		D = cosmo.scale_independent_growth_factor(self.z)
+		#~ f = Omega_m**0.55
+		fz = cosmo.scale_independent_growth_factor_f(self.z)
+		Dz= cosmo.scale_independent_growth_factor(self.z)
+		print fz, Dz
 		
 		####################################################################
 		####################################################################
@@ -206,7 +212,7 @@ class BE_HaPPy(Likelihood):
 			
 		
 		# compute tns coeff  and interpolate on z	
-		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,f,b1,C_window=C_window)
+		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
 
 		# compute the multipole expansion coefficients
 		kappa = np.zeros((len(kbound)))
@@ -216,28 +222,39 @@ class BE_HaPPy(Likelihood):
 		coeffD = np.zeros((len(kbound)))
 		coeffE = np.zeros((len(kbound)))
 
-		kappa = kbound*(data.mcmc_parameters['sigma_v']['current']*data.mcmc_parameters['sigma_v']['scale'])*f*D
+		kappa = kbound*sigma_v*fz*Dz
 		coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)
 		coeffB = 6/kappa**2*(coeffA - 2/(2+kappa**2))
 		coeffC = -10/kappa**2*(coeffB - 2/(2+kappa**2))
 		coeffD = -2/3./kappa**2*(coeffC - 2/(2+kappa**2))
 		coeffE = -4/10./kappa**2*(7.*coeffD - 2/(2+kappa**2))
 		
+		#~ kill
 		# compute ps in redshift space
 		Pred = np.zeros((len(kbound)))
-		Pred = PhhDD*coeffA  + 2/3.*f*PhhDT*coeffB + 1/5.*f**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
+		Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
 		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE
 		
 		
-		inv_sigma2 = 1.0/(yerr[lim]**2)
-
+		### interpolate data on kbound
+		if len(self.Psimu) != len(kbound):
+			self.Psimu = np.interp(kbound, self.ksimu, self.Psimu)
+			self.err = np.interp(kbound, self.ksimu, self.err)
+		
 		### plot to test
-		plt.plot(self.ksimu, self.Psimu, c='r')
-		plt.plot(kbound, Pred, c='b')
-		plt.xscale('log')
-		plt.yscale('log')
-		plt.show()
+		#~ plt.plot(kbound, self.Psimu, c='b')
+		#~ plt.plot(kbound, Pred, c='r')
+		#~ plt.xscale('log')
+		#~ plt.yscale('log')
+		#~ plt.show()
+		
+		
+		
+		### compute the chi square
+		
+		inv_sigma2 = 1.0/(self.err**2)
+		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
 
 		end = time.time()
 		print 'total time is '+str((end - start))
-		return -0.5 * chi2
+		return chi2
