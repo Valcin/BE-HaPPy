@@ -116,10 +116,13 @@ class BE_HaPPy(Likelihood):
 		Omega_b = cosmo.Omega_b()
 		Omega_cdm = cosmo.Omega_cdm()
 		Omega_m = cosmo.Omega_m()
+		Omega_Lambda = cosmo.Omega_Lambda()
+		Omega_k = cosmo.Omega0_k()
 		h = cosmo.h()
 		
 		
-		print h, Omega_m
+		print h, Omega_m, Omega_b, Omega_cdm, Omega_Lambda, Omega_k
+
 		#### get the linear power spectrum from class
 		#~ pk_lin = np.zeros((len(kclass)), 'float64')
 		#~ for ik in xrange(len(kclass)):
@@ -148,9 +151,9 @@ class BE_HaPPy(Likelihood):
 			#~ pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
-		#~ f = Omega_m**0.55
+		#~ fz = Omega_m**0.55
 		fz = cosmo.scale_independent_growth_factor_f(self.z)
-		Dz= cosmo.scale_independent_growth_factor(self.z)
+		Dz = cosmo.scale_independent_growth_factor(self.z)
 		print fz, Dz
 		
 		####################################################################
@@ -233,7 +236,7 @@ class BE_HaPPy(Likelihood):
 		# compute ps in redshift space
 		Pred = np.zeros((len(kbound)))
 		Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
-		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE
+		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
 		
 		
 		### interpolate data on kbound
@@ -251,10 +254,16 @@ class BE_HaPPy(Likelihood):
 		
 		
 		### compute the chi square
-		
-		inv_sigma2 = 1.0/(self.err**2)
-		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-
+		#~ inv_sigma2 = 1.0/(self.err**2)
+		#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
+		if 0.315 < Omega_m < 0.32:
+			inv_sigma2 = 1.0/(self.err**2)
+			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
+		else:
+			inv_sigma2 = 1.0/(self.err**2)
+			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2))) - 1e6
+			
+		print chi2
 		end = time.time()
 		print 'total time is '+str((end - start))
 		return chi2

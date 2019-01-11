@@ -36,16 +36,7 @@ class BE_HaPPy(Likelihood):
 		# variables
 		A_shot = (data.mcmc_parameters['A_shot']['current'] *
 		data.mcmc_parameters['A_shot']['scale'])
-		sigma_v = (data.mcmc_parameters['sigma_v']['current'] *
-		data.mcmc_parameters['sigma_v']['scale'])
-		b1 = (data.mcmc_parameters['b1']['current'] *
-		data.mcmc_parameters['b1']['scale'])
-		b2 = (data.mcmc_parameters['b2']['current'] *
-		data.mcmc_parameters['b2']['scale'])
-		
-		# compute bs and b3nl according to local lagrangian bias
-		bs = -4/7. * (b1 -1)
-		b3nl = 32/315. * (b1 -1)
+
 		
 		####################################################################
 		####################################################################
@@ -139,8 +130,10 @@ class BE_HaPPy(Likelihood):
 			pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
-		f = Omega_m**0.55
-		D = cosmo.scale_independent_growth_factor(self.z)
+		#~ fz = Omega_m**0.55
+		fz = cosmo.scale_independent_growth_factor_f(self, z)
+		Dz = cosmo.scale_independent_growth_factor(self.z)
+		print fz, Dz
 		
 		####################################################################
 		####################################################################
@@ -210,6 +203,9 @@ class BE_HaPPy(Likelihood):
 		coeffC = np.zeros((len(kbound)))
 		coeffD = np.zeros((len(kbound)))
 		coeffE = np.zeros((len(kbound)))
+		
+		sigma_v = (data.mcmc_parameters['sigma_v']['current'] *
+		data.mcmc_parameters['sigma_v']['scale'])
 
 		kappa = kbound*(data.mcmc_parameters['sigma_v']['current']*data.mcmc_parameters['sigma_v']['scale'])*f*D
 		coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)

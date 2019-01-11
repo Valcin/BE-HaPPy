@@ -13,6 +13,7 @@ import sys
 sys.path.append('/home/david/codes/FAST-PT')
 import myFASTPT as FPT
 
+
 class BE_HaPPy(Likelihood):
 	def __init__(self, path, data, command_line):
 
@@ -23,7 +24,28 @@ class BE_HaPPy(Likelihood):
 		self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.9*self.kmax})
 		self.need_cosmo_arguments(data, {'non linear': 'halofit'})
 
-
+		#~ #-------------------------------------------------
+		#~ #---------------- Data ---------------------------
+		#~ #-------------------------------------------------
+		Class = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class/test_z2_pk.dat')
+		self.kclass = Class[:,0]
+		self.Pclass = Class[:,1]
+		
+		#### load halo redshift space ps
+		### for test
+		self.data_directory = data.path['root']
+		print self.data_directory
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/codes/analysis')
+		sys.path.append(dat_file_path)
+		from load_data import ld_data
+		kcamb, Pcamb, k, Pmm, PH1, PH2, PH3 , PH4, errPhh1, errPhh2, errPhh3, errPhh4, bias1, bias2, bias3, bias4, \
+		bias1s, bias2s, bias3s, bias4s, errb1, errb2, errb3, errb4, Pmono1, Pmono2, Pmono3, Pmono4, errPr1, errPr2, errPr3,\
+		errPr4, kclass, Tm, Tcb, noise1, noise2, noise3, noise4 = ld_data(0.15, [0.0,0.5,1.0,2.0], 1)
+		
+		self.ksimu = k
+		self.Psimu = Pmono1
+		self.err = errPr1
+		
 		#~ THINK OF HST PRIORS
 		# Else the file will be created in the loglkl() function.
 		return
@@ -74,58 +96,62 @@ class BE_HaPPy(Likelihood):
 
 		#### Store the selected redshifts in a array and deduce its length for the loops
 		#### array manipulation because len() and size only work for znumber >1
-		a = np.array(redshift)
-		znumber = a.size 
+		red = np.array(redshift)
+		znumber = red.size 
 		redshift = np.zeros(znumber,'float64') 
-		redshift[:] = a
-
-		#### Store the redshifts where bcc fit and bcc Ls are available in arrays
-		red2 = [0.0,0.5,1.0,2.0]
-		l2= len(red2)
-
+		redshift[:] = red
 
 		#### get the transfer function from class
-		kget = cosmo.get_transfer(self.z)
-		kclass = kget.get('k (h/Mpc)')
-		d_b = np.zeros((len(kclass)), 'float64')
-		d_cdm = np.zeros((len(kclass)), 'float64')
-		d_tot = np.zeros((len(kclass)), 'float64')
-		transfer = cosmo.get_transfer(self.z)
-		d_b = transfer.get('d_b')
-		d_cdm = transfer.get('d_cdm')
-		d_tot = transfer.get('d_tot')
-			
-		#### Since the cosmo.pk k's are bounded in [0.000000e+00:5.366287e+00]
-		#### and Fast- PT requires a evenly sampled array in log scale 
-		#### we interpolate
-		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
-		d_b = np.interp(kbound, kclass,d_b)
-		d_cdm = np.interp(kbound, kclass,d_cdm)
-		d_tot = np.interp(kbound, kclass,d_tot)
-
+		#~ kget = cosmo.get_transfer(self.z, output_format='camb')
+		#~ kclass = kget.get('k (h/Mpc)')
+		#~ d_b = np.zeros((len(kclass)), 'float64')
+		#~ d_cdm = np.zeros((len(kclass)), 'float64')
+		#~ d_tot = np.zeros((len(kclass)), 'float64')
+		#~ transfer = cosmo.get_transfer(self.z)
+		#~ d_b = transfer.get('d_b')
+		#~ d_cdm = transfer.get('d_cdm')
+		#~ d_tot = transfer.get('d_tot')
+		
 		#### import Omega_b and Omega_cdm from class. Remember to add Omega_cdm in classy and recompile after
 		Omega_b = cosmo.Omega_b()
 		Omega_cdm = cosmo.Omega_cdm()
 		Omega_m = cosmo.Omega_m()
 		h = cosmo.h()
-
-		#### define the CDM + baryons transfer function 
-		T_cb = np.zeros((len(kclass)), 'float64')
-		T_cb = (Omega_cdm * d_cdm + Omega_b * d_b)/(Omega_cdm + Omega_b)
 		
+		
+		print h, Omega_m
 		#### get the linear power spectrum from class
-		pk_lin = np.zeros((len(kbound)), 'float64')
-		for ik in xrange(len(kbound)):
-			pk_lin[ik] = cosmo.pk_lin(kbound[ik], self.z)
-				
+		#~ pk_lin = np.zeros((len(kclass)), 'float64')
+		#~ for ik in xrange(len(kclass)):
+			#~ pk_lin[ik] = cosmo.pk_lin(kclass[ik]*h, self.z)
+		
+		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
+		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
+		pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
+		#~ pk_lin = cosmo.get_pk_cb_array(kclass, redshift, len(kclass), znumber, 0) # if we want Pcb
+			
+		
+		### compare classy amplitude with classy
+		import matplotlib.pyplot as plt
+		#~ plt.plot(self.kclass, self.Pclass, c='r')
+		#~ plt.plot(kbound, pk_lin*h**3, c='b')
+		#~ plt.xscale('log')
+		#~ plt.yscale('log')
+		#~ plt.show()
+		
+		### rescale the amplitude of pk_lin accoridngly
+		pk_lin *= h**3 
+		
 		#### get the non linear power spectrum from class
-		pk = np.zeros((len(kbound)), 'float64')
-		for ik in xrange(len(kbound)):
-			pk[ik] = cosmo.pk(kbound[ik], self.z)
+		#~ pk = np.zeros((len(kbound)), 'float64')
+		#~ for ik in xrange(len(kbound)):
+			#~ pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
-		f = Omega_m**0.55
-		D = cosmo.scale_independent_growth_factor(self.z)
+		#~ f = Omega_m**0.55
+		fz = cosmo.scale_independent_growth_factor_f(self.z)
+		Dz= cosmo.scale_independent_growth_factor(self.z)
+		print fz, Dz
 		
 		####################################################################
 		####################################################################
@@ -186,7 +212,7 @@ class BE_HaPPy(Likelihood):
 			
 		
 		# compute tns coeff  and interpolate on z	
-		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,f,b1,C_window=C_window)
+		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
 
 		# compute the multipole expansion coefficients
 		kappa = np.zeros((len(kbound)))
@@ -196,18 +222,39 @@ class BE_HaPPy(Likelihood):
 		coeffD = np.zeros((len(kbound)))
 		coeffE = np.zeros((len(kbound)))
 
-		kappa = kbound*(data.mcmc_parameters['sigma_v']['current']*data.mcmc_parameters['sigma_v']['scale'])*f*D
+		kappa = kbound*sigma_v*fz*Dz
 		coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)
 		coeffB = 6/kappa**2*(coeffA - 2/(2+kappa**2))
 		coeffC = -10/kappa**2*(coeffB - 2/(2+kappa**2))
 		coeffD = -2/3./kappa**2*(coeffC - 2/(2+kappa**2))
 		coeffE = -4/10./kappa**2*(7.*coeffD - 2/(2+kappa**2))
 		
+		#~ kill
 		# compute ps in redshift space
 		Pred = np.zeros((len(kbound)))
-		Pred = PhhDD*coeffA  + 2/3.*f*PhhDT*coeffB + 1/5.*f**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
-		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE
+		Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
+		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
+		
+		
+		### interpolate data on kbound
+		if len(self.Psimu) != len(kbound):
+			self.Psimu = np.interp(kbound, self.ksimu, self.Psimu)
+			self.err = np.interp(kbound, self.ksimu, self.err)
+		
+		### plot to test
+		#~ plt.plot(kbound, self.Psimu, c='b')
+		#~ plt.plot(kbound, Pred, c='r')
+		#~ plt.xscale('log')
+		#~ plt.yscale('log')
+		#~ plt.show()
+		
+		
+		
+		### compute the chi square
+		
+		inv_sigma2 = 1.0/(self.err**2)
+		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
 
 		end = time.time()
 		print 'total time is '+str((end - start))
-		return -0.5 * chi2
+		return chi2
