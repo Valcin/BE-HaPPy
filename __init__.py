@@ -256,7 +256,7 @@ class BE_HaPPy(Likelihood):
 		### compute the chi square
 		#~ inv_sigma2 = 1.0/(self.err**2)
 		#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		if 0.315 < Omega_m < 0.32:
+		if 0.31 < Omega_m < 0.325:
 			inv_sigma2 = 1.0/(self.err**2)
 			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
 		else:
