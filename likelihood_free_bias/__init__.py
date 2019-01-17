@@ -117,11 +117,15 @@ class BE_HaPPy(Likelihood):
 		Omega_cdm = cosmo.Omega_cdm()
 		Omega_m = cosmo.Omega_m()
 		Omega_Lambda = cosmo.Omega_Lambda()
+		blabla = cosmo.get_current_derived_parameters(['m_ncdm_tot','m_ncdm_in_eV'])
+		
 		Omega_k = cosmo.Omega0_k()
 		h = cosmo.h()
 		
 		
-		print h, Omega_m, Omega_b, Omega_cdm, Omega_Lambda, Omega_k
+		print h, Omega_m, Omega_b, Omega_cdm
+		print blabla.get('m_ncdm_tot')
+		print blabla.get('m_ncdm_tot')/h**2/93.14 + Omega_b + Omega_cdm
 
 		#### get the linear power spectrum from class
 		#~ pk_lin = np.zeros((len(kclass)), 'float64')
@@ -130,8 +134,8 @@ class BE_HaPPy(Likelihood):
 		
 		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
 		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
-		pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
-		#~ pk_lin = cosmo.get_pk_cb_array(kclass, redshift, len(kclass), znumber, 0) # if we want Pcb
+		#~ pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
+		pk_lin = cosmo.get_pk_cb_array(kbound*h, redshift, len(kbound), znumber, 0) # if we want Pcb
 			
 		
 		### compare classy amplitude with classy
@@ -254,14 +258,14 @@ class BE_HaPPy(Likelihood):
 		
 		
 		### compute the chi square
-		#~ inv_sigma2 = 1.0/(self.err**2)
-		#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		if 0.31 < Omega_m < 0.325:
-			inv_sigma2 = 1.0/(self.err**2)
-			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		else:
-			inv_sigma2 = 1.0/(self.err**2)
-			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2))) - 1e6
+		inv_sigma2 = 1.0/(self.err**2)
+		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
+		#~ if 0.317 < Omega_m < 0.318:
+			#~ inv_sigma2 = 1.0/(self.err**2)
+			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 ))
+		#~ else:
+			#~ inv_sigma2 = 1.0/(self.err**2)
+			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 )) - 1e6
 			
 		print chi2
 		end = time.time()

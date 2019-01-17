@@ -31,6 +31,12 @@ class BE_HaPPy(Likelihood):
 		self.kclass = Class[:,0]
 		self.Pclass = Class[:,1]
 		
+		
+		# store the calibrated redshift
+		self.red = [0.0,0.5,1.0,2.0] 
+		self.lred = len(self.red) 
+		
+		
 		#### load halo redshift space ps
 		### for test
 		self.data_directory = data.path['root']
@@ -58,16 +64,6 @@ class BE_HaPPy(Likelihood):
 		# variables
 		A_shot = (data.mcmc_parameters['A_shot']['current'] *
 		data.mcmc_parameters['A_shot']['scale'])
-		sigma_v = (data.mcmc_parameters['sigma_v']['current'] *
-		data.mcmc_parameters['sigma_v']['scale'])
-		b1 = (data.mcmc_parameters['b1']['current'] *
-		data.mcmc_parameters['b1']['scale'])
-		b2 = (data.mcmc_parameters['b2']['current'] *
-		data.mcmc_parameters['b2']['scale'])
-		
-		# compute bs and b3nl according to local lagrangian bias
-		bs = -4/7. * (b1 -1)
-		b3nl = 32/315. * (b1 -1)
 		
 		####################################################################
 		####################################################################
@@ -130,8 +126,8 @@ class BE_HaPPy(Likelihood):
 		
 		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
 		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
-		#~ pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
-		pk_lin = cosmo.get_pk_cb_array(kbound*h, redshift, len(kbound), znumber, 0) # if we want Pcb
+		pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
+		#~ pk_lin = cosmo.get_pk_cb_array(kclass, redshift, len(kclass), znumber, 0) # if we want Pcb
 			
 		
 		### compare classy amplitude with classy
@@ -154,52 +150,37 @@ class BE_HaPPy(Likelihood):
 		#~ fz = Omega_m**0.55
 		fz = cosmo.scale_independent_growth_factor_f(self.z)
 		Dz = cosmo.scale_independent_growth_factor(self.z)
-		print fz, Dz
+		#~ print fz, Dz
 		
 		####################################################################
 		####################################################################
-		### compute perturbation terms 
+		### load perturbation terms 
+		pt_terms = ['Pmod_dd', 'Pmod_dt', 'Pmod_tt','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 		
-		# set the parameters for the power spectrum window and
-		# Fourier coefficient window 
-		#P_window=np.array([.2,.2])  
-		C_window=0.95
-
-		# padding length 
-		nu=-2; n_pad=len(kbound)
-		n_pad=int(0.5*len(kbound))
-		to_do=['all']
-						
-		# initialize the FASTPT class 
-		# including extrapolation to higher and lower k  
-		# time the operation
-		fastpt=FPT.FASTPT(kbound,to_do=to_do,n_pad=n_pad, verbose=True) 
+		
+		Pmod_dd = self.interpol_pt(pt_terms[0], kbound, self.z)
+		Pmod_dt = self.interpol_pt(pt_terms[1], kbound, self.z)
+		Pmod_tt = self.interpol_pt(pt_terms[2], kbound, self.z)
+		A = self.interpol_pt(pt_terms[3], kbound, self.z)
+		B = self.interpol_pt(pt_terms[4], kbound, self.z)
+		C = self.interpol_pt(pt_terms[5], kbound, self.z)
+		D = self.interpol_pt(pt_terms[6], kbound, self.z)
+		E = self.interpol_pt(pt_terms[7], kbound, self.z)
+		F = self.interpol_pt(pt_terms[8], kbound, self.z)
+		G = self.interpol_pt(pt_terms[9], kbound, self.z)
+		H = self.interpol_pt(pt_terms[10], kbound, self.z)
+		
+		
+		####################################################################
+		####################################################################
+		### load bias coefficients
+		
+		b1, b2, b3, b4 = self.bcoeff(self.z)
+		#~ b1 = self.bcoeff(self.z)
+ 
+		print b1, b2, b3, b4
+		kill
 			
-		# calculate 1loop SPT (and time the operation) for density
-		P_spt_dd=fastpt.one_loop_dd(pk_lin,C_window=C_window)
-			
-		# calculate 1loop SPT (and time the operation) for velocity
-		P_spt_tt=fastpt.one_loop_tt(pk_lin,C_window=C_window)
-			
-		# calculate 1loop SPT (and time the operation) for velocity - density
-		P_spt_dt=fastpt.one_loop_dt(pk_lin,C_window=C_window)
-			
-			
-		#calculate tidal torque EE and BB P(k)
-		#~ P_RSD=fastpt.RSD_components(P,1.0,C_window=C_window)	
-
-		# update the power spectrum
-		Pmod_dd=pk_lin+P_spt_dd[0]
-		Pmod_dt=pk_lin+P_spt_dt[0]
-		Pmod_tt=pk_lin+P_spt_tt[0]	
-		A = P_spt_dd[2]
-		B = P_spt_dd[3]
-		C = P_spt_dd[4]
-		D = P_spt_dd[5]
-		E = P_spt_dd[6]
-		F = P_spt_dd[7]
-		G = P_spt_dt[2]
-		H = P_spt_dt[3]
 
 		####################################################################
 		####################################################################
@@ -224,6 +205,9 @@ class BE_HaPPy(Likelihood):
 		coeffC = np.zeros((len(kbound)))
 		coeffD = np.zeros((len(kbound)))
 		coeffE = np.zeros((len(kbound)))
+		
+		sigma_v = (data.mcmc_parameters['sigma_v']['current'] *
+		data.mcmc_parameters['sigma_v']['scale'])
 
 		kappa = kbound*sigma_v*fz*Dz
 		coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)
@@ -254,16 +238,114 @@ class BE_HaPPy(Likelihood):
 		
 		
 		### compute the chi square
-		#~ inv_sigma2 = 1.0/(self.err**2)
-		#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		if 0.3165 < Omega_m < 0.3185:
-			inv_sigma2 = 1.0/(self.err**2)
-			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		else:
-			inv_sigma2 = 1.0/(self.err**2)
-			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2))) - 1e6
+		inv_sigma2 = 1.0/(self.err**2)
+		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
 			
 		print chi2
 		end = time.time()
 		print 'total time is '+str((end - start))
-		return chi2
+		return -chi2
+		
+		
+##########################################################################################################################
+##########################################################################################################################
+		
+	def interpol_pt(self, pt_term, kbound, z):
+		
+		size_k = 350 #size of the pt text file
+		kpt = np.zeros((350))
+		pt = np.zeros((350,self.lred))
+		pt_temp = np.zeros((len(kbound),self.lred))
+		pt_final = np.zeros((len(kbound),len(np.atleast_1d(z))))
+		for count,iz in enumerate(self.red):
+			dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
+			'/PT_coeff/'+pt_term+'_'+str(iz)+'.txt')
+
+			with open(dat_file_path,'r') as f:  
+				line = f.readline()
+				for index_k in range(size_k):
+					kpt[index_k] = float(line.split()[0])
+					pt[index_k,count] = float(line.split()[1])
+					line = f.readline()
+			# interpolate on kbound
+			pt_temp[:,count] = np.interp(kbound, kpt, pt[:,count]) 
+			
+			# interpolate on z
+			for i in range(len(kbound)):
+				pt_final[i,:] = np.interp(z, self.red, pt_temp[i,:])
+				
+		return pt_final
+		
+		
+#-----------------------------------------------------------------------
+		
+	def bcoeff(self,z):
+		b1 = np.zeros((self.lred))
+		b2 = np.zeros((self.lred))
+		b3 = np.zeros((self.lred))
+		b4 = np.zeros((self.lred))
+		b1_final = np.zeros(len(np.atleast_1d(z)))
+		b2_final = np.zeros(len(np.atleast_1d(z)))
+		b3_final = np.zeros(len(np.atleast_1d(z)))
+		b4_final = np.zeros(len(np.atleast_1d(z)))
+		
+		
+		if self.bmodel == 1:
+			for count,iz in enumerate(self.red):
+				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/large_scale/'\
+				'LS_z='+str(iz)+'_.txt')
+				with open(dat_file_path,'r') as f: 
+					line = f.readline()   
+					b1[count] = float(line.split()[self.mbin])
+					
+			# interpolate on z
+			b1_final = np.interp(z, self.red, b1)
+			b2_final = np.interp(z, self.red, b2)
+			b3_final = np.interp(z, self.red, b3)
+			b4_final = np.interp(z, self.red, b4)
+			
+			return b1_final, b2_final, b3_final, b4_final # here b2_final, b3_final, b4_final == 0
+
+		elif self.bmodel == 2:
+			for count,iz in enumerate(self.red):
+				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
+				'/case'+str(self.kcase)+'/coeff_pl_0.0_z='+str(iz)+'.txt')
+				with open(dat_file_path,'r') as f:
+					for i, line in enumerate(f):
+						if i == self.mbin: 
+							b1[count] = float(line.split()[0])
+							b2[count] = float(line.split()[1])
+							b3[count] = float(line.split()[2])
+							b4[count] = float(line.split()[3])
+							
+			# interpolate on z
+			b1_final = np.interp(z, self.red, b1)
+			b2_final = np.interp(z, self.red, b2)
+			b3_final = np.interp(z, self.red, b3)
+			b4_final = np.interp(z, self.red, b4)
+					
+			return b1_final, b2_final, b3_final, b4_final
+
+		elif self.bmodel == 3:
+			for count,iz in enumerate(self.red):
+				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
+				'/case'+str(self.kcase)+'/coeff_3exp_0.0_z='+str(iz)+'.txt')
+				with open(dat_file_path,'r') as f: 
+					for i, line in enumerate(f):
+						if i == self.mbin: 
+							b1[count] = float(line.split()[0])
+							b2[count] = float(line.split()[1])
+							b3[count] = float(line.split()[2])
+							b4[count] = float(line.split()[3])
+						
+			# interpolate on z
+			b1_final = np.interp(z, self.red, b1)
+			b2_final = np.interp(z, self.red, b2)
+			b3_final = np.interp(z, self.red, b3)
+			b4_final = np.interp(z, self.red, b4)
+					
+			return b1_final, b2_final, b3_final, b4_final
+		
+#-----------------------------------------------------------------------
+
+
