@@ -21,7 +21,7 @@ BE_HaPPy.zmax = 2
 BE_HaPPy.Mnu = 0.0
 
 # choice of bias model between (1,2,3)
-BE_HaPPy.bmodel = 3
+BE_HaPPy.bmodel = 1
 
 #choice of mass bins between (0,1,2,3) cf paper
 BE_HaPPy.mbin = 1
@@ -30,8 +30,8 @@ BE_HaPPy.mbin = 1
 BE_HaPPy.rsd = 1
 
 # whether or not to include FoG (0 or 1), 1 for yes. If yes uncomment sigma_v nuisance
-BE_HaPPy.fog = 0
-#BE_HaPPy.use_nuisance = ['sigma_v']
+BE_HaPPy.fog = 1
+BE_HaPPy.use_nuisance = ['sigma_v']
 
 # compute Pcc or Pmm
 BE_HaPPy.cdm = 1

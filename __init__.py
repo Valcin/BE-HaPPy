@@ -117,7 +117,7 @@ class BE_HaPPy(Likelihood):
 		h = cosmo.h()
 		
 		
-		print h, Omega_m, Omega_b, Omega_cdm, Omega_Lambda, Omega_k
+		#~ print h, Omega_m, Omega_b, Omega_cdm, Omega_Lambda, Omega_k
 
 		#### get the linear power spectrum from class
 		#~ pk_lin = np.zeros((len(kclass)), 'float64')
@@ -176,9 +176,13 @@ class BE_HaPPy(Likelihood):
 		### load bias coefficients
 		
 		b1, b2, b3, b4 = self.bcoeff(self.z)
-		#~ b1 = self.bcoeff(self.z)
- 
-		print b1, b2, b3, b4
+		
+		####################################################################
+		####################################################################
+		### compute the redshift power spectrum
+		
+		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt)
+
 		kill
 			
 
@@ -198,23 +202,7 @@ class BE_HaPPy(Likelihood):
 		# compute tns coeff  and interpolate on z	
 		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
 
-		# compute the multipole expansion coefficients
-		kappa = np.zeros((len(kbound)))
-		coeffA = np.zeros((len(kbound)))
-		coeffB = np.zeros((len(kbound)))
-		coeffC = np.zeros((len(kbound)))
-		coeffD = np.zeros((len(kbound)))
-		coeffE = np.zeros((len(kbound)))
 		
-		sigma_v = (data.mcmc_parameters['sigma_v']['current'] *
-		data.mcmc_parameters['sigma_v']['scale'])
-
-		kappa = kbound*sigma_v*fz*Dz
-		coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)
-		coeffB = 6/kappa**2*(coeffA - 2/(2+kappa**2))
-		coeffC = -10/kappa**2*(coeffB - 2/(2+kappa**2))
-		coeffD = -2/3./kappa**2*(coeffC - 2/(2+kappa**2))
-		coeffE = -4/10./kappa**2*(7.*coeffD - 2/(2+kappa**2))
 		
 		#~ kill
 		# compute ps in redshift space
@@ -289,8 +277,8 @@ class BE_HaPPy(Likelihood):
 		b3_final = np.zeros(len(np.atleast_1d(z)))
 		b4_final = np.zeros(len(np.atleast_1d(z)))
 		
-		
 		if self.bmodel == 1:
+			print 'you chose the linear bias'
 			for count,iz in enumerate(self.red):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/large_scale/'\
 				'LS_z='+str(iz)+'_.txt')
@@ -307,6 +295,7 @@ class BE_HaPPy(Likelihood):
 			return b1_final, b2_final, b3_final, b4_final # here b2_final, b3_final, b4_final == 0
 
 		elif self.bmodel == 2:
+			print 'you chose the polynomial bias'
 			for count,iz in enumerate(self.red):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
 				'/case'+str(self.kcase)+'/coeff_pl_0.0_z='+str(iz)+'.txt')
@@ -327,6 +316,7 @@ class BE_HaPPy(Likelihood):
 			return b1_final, b2_final, b3_final, b4_final
 
 		elif self.bmodel == 3:
+			print 'you chose the perturbation theory bias'
 			for count,iz in enumerate(self.red):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
 				'/case'+str(self.kcase)+'/coeff_3exp_0.0_z='+str(iz)+'.txt')
@@ -347,5 +337,102 @@ class BE_HaPPy(Likelihood):
 			return b1_final, b2_final, b3_final, b4_final
 		
 #-----------------------------------------------------------------------
+
+	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt):
+		if self.fog == 1:
+			# compute the multipole expansion coefficients
+			kappa = np.zeros((len(kbound)))
+			coeffA = np.zeros((len(kbound)))
+			coeffB = np.zeros((len(kbound)))
+			coeffC = np.zeros((len(kbound)))
+			coeffD = np.zeros((len(kbound)))
+			coeffE = np.zeros((len(kbound)))
+			
+			sigma_v = (data.mcmc_parameters['sigma_v']['current'] *
+			data.mcmc_parameters['sigma_v']['scale'])
+
+			kappa = kbound*sigma_v*fz*Dz
+			coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)
+			coeffB = 6/kappa**2*(coeffA - 2/(2+kappa**2))
+			coeffC = -10/kappa**2*(coeffB - 2/(2+kappa**2))
+			coeffD = -2/3./kappa**2*(coeffC - 2/(2+kappa**2))
+			coeffE = -4/10./kappa**2*(7.*coeffD - 2/(2+kappa**2))
+	
+			if self.rsd == 1:
+				print 'you chose the Kaiser model'
+				if self.bmodel == 1:
+					b = b1
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					
+				elif self.bmodel == 2:
+					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					
+				elif self.bmodel == 3:
+					raise ValueError('Sorry combination not available')
+					
+			elif self.rsd == 2:
+				print 'you chose the Scoccimaro model'
+				if self.bmodel == 1:
+					b = b1
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					
+				elif self.bmodel == 2:
+					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+					Pred = pk_lin*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					
+				elif self.bmodel == 3:
+					raise ValueError('Sorry combination not available')
+	
+			elif self.rsd == 3:
+				print 'you chose the TNS model'
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
+			elif self.rsd == 4:
+				print 'you chose the eTNS model'
+				dim = np.shape(P_halo)
+				Pred = np.zeros(dim)
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						#~ ind2 = mbins.index(j)
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz]  + 2/3.*f[iz]*PhhDT[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
+		#------------
+		else:
+			if self.rsd == 1:
+				print 'you chose the Kaiser model'
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz] + 1/5.*f[iz]**2
+			elif self.rsd == 2:
+				print 'you chose the Scoccimaro model'
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]\
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]
+			elif self.rsd == 3:
+				print 'you chose the TNS model'
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						Pred[:,iz,count] = P_halo[:,iz,count]  + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]\
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz] + 1/3.*AB2[:,iz,count]+ 1/5.*AB4[:,iz,count]\
+						+ 1/7.*AB6[:,iz,count]+ 1/9.*AB8[:,iz,count]
+			elif self.rsd == 4:
+				print 'you chose the eTNS model'
+				dim = np.shape(P_halo)
+				Pred = np.zeros(dim)
+				for iz in xrange(znumber):
+					for count,j in enumerate(Massbins):
+						#~ ind2 = mbins.index(j)
+						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz]  + 2/3.*f[iz]*PhhDT[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
+						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
+			
+		return Pred
+	
 
 
