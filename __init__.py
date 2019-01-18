@@ -35,7 +35,7 @@ class BE_HaPPy(Likelihood):
 		# store the calibrated redshift
 		self.red = [0.0,0.5,1.0,2.0] 
 		self.lred = len(self.red) 
-		
+		ind = self.red.index(self.z)
 		
 		#### load halo redshift space ps
 		### for test
@@ -46,7 +46,7 @@ class BE_HaPPy(Likelihood):
 		from load_data import ld_data
 		kcamb, Pcamb, k, Pmm, PH1, PH2, PH3 , PH4, errPhh1, errPhh2, errPhh3, errPhh4, bias1, bias2, bias3, bias4, \
 		bias1s, bias2s, bias3s, bias4s, errb1, errb2, errb3, errb4, Pmono1, Pmono2, Pmono3, Pmono4, errPr1, errPr2, errPr3,\
-		errPr4, kclass, Tm, Tcb, noise1, noise2, noise3, noise4 = ld_data(0.15, [0.0,0.5,1.0,2.0], 1)
+		errPr4, kclass, Tm, Tcb, noise1, noise2, noise3, noise4 = ld_data(self.Mnu, self.red, ind)
 		
 		self.ksimu = k
 		self.Psimu = Pmono1
@@ -64,7 +64,7 @@ class BE_HaPPy(Likelihood):
 		# variables
 		A_shot = (data.mcmc_parameters['A_shot']['current'] *
 		data.mcmc_parameters['A_shot']['scale'])
-		print self.z
+		
 		####################################################################
 		####################################################################
 		#### import classy results
@@ -82,9 +82,6 @@ class BE_HaPPy(Likelihood):
 				
 			if not self.z:
 				raise ValueError('Please define redshift(s)')
-
-		
-		
 
 		#### Store the selected redshifts in a array and deduce its length for the loops
 		#### array manipulation because len() and size only work for znumber >1
@@ -112,18 +109,17 @@ class BE_HaPPy(Likelihood):
 		Omega_k = cosmo.Omega0_k()
 		h = cosmo.h()
 		
-		
 		#~ print h, Omega_m, Omega_b, Omega_cdm, Omega_Lambda, Omega_k
-
-		#### get the linear power spectrum from class
-		#~ pk_lin = np.zeros((len(kclass)), 'float64')
-		#~ for ik in xrange(len(kclass)):
-			#~ pk_lin[ik] = cosmo.pk_lin(kclass[ik]*h, self.z)
 		
+		# compute the scale array from the data file
 		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
+		
+		
 		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
-		pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
-		#~ pk_lin = cosmo.get_pk_cb_array(kclass, redshift, len(kclass), znumber, 0) # if we want Pcb
+		if self.cdm == 0:
+			pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
+		elif self.cdm == 1:
+			pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) # if we want Pcb
 			
 		
 		### compare classy amplitude with classy
@@ -168,39 +164,11 @@ class BE_HaPPy(Likelihood):
 		
 		b1, b2, b3, b4 = self.bcoeff(self.z)
 		
-		# compute tns coeff
-		# set the parameters for the power spectrum window and
-		# Fourier coefficient window 
-		#P_window=np.array([.2,.2])  
-		C_window=0.95
-
-		# padding length 
-		nu=-2; n_pad=len(kbound)
-		n_pad=int(0.5*len(kbound))
-		to_do=['all']
-						
-		# initialize the FASTPT class 
-		# including extrapolation to higher and lower k  
-		# time the operation
-		fastpt=FPT.FASTPT(kbound,to_do=to_do,n_pad=n_pad, verbose=True) 
-		
-		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
-		
-		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/TNS_coeff/'\
-				'AB_'+str(self.mbin)+'_'+str(self.bmodel)+'_z='+str(self.z)+'.txt')
-		with open(dat_file_path, 'w+') as fid_file:
-			for index_k in xrange(len(kbound)):
-				fid_file.write('%.8g %.8g %.8g %.8g\n' % ( AB2[index_k], AB4[index_k], AB6[index_k], AB8[index_k]))
-		fid_file.close()
-		
 		####################################################################
 		####################################################################
 		### compute the redshift power spectrum
 		
-		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt,\
-		AB2, AB4, AB6, AB8, A_shot)
-
-		kill
+		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt, A_shot)
 
 		####################################################################
 		####################################################################
@@ -211,13 +179,13 @@ class BE_HaPPy(Likelihood):
 			self.err = np.interp(kbound, self.ksimu, self.err)
 		
 		### plot to test
-		#~ plt.plot(kbound, self.Psimu, c='b')
-		#~ plt.plot(kbound, Pred, c='r')
-		#~ plt.xscale('log')
-		#~ plt.yscale('log')
-		#~ plt.show()
+		plt.plot(kbound, self.Psimu, c='b')
+		plt.plot(kbound, Pred, c='r')
+		plt.xscale('log')
+		plt.yscale('log')
+		plt.show()
 		
-		
+		kill
 		
 		### compute the chi square
 		inv_sigma2 = 1.0/(self.err**2)
@@ -238,7 +206,8 @@ class BE_HaPPy(Likelihood):
 		kpt = np.zeros((350))
 		pt = np.zeros((350,self.lred))
 		pt_temp = np.zeros((len(kbound),self.lred))
-		pt_final = np.zeros((len(kbound),len(np.atleast_1d(z))))
+		#~ pt_final = np.zeros((len(kbound),len(np.atleast_1d(z))))
+		pt_final = np.zeros((len(kbound)))
 		for count,iz in enumerate(self.red):
 			dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
 			'/PT_coeff/'+pt_term+'_'+str(iz)+'.txt')
@@ -254,7 +223,8 @@ class BE_HaPPy(Likelihood):
 			
 			# interpolate on z
 			for i in range(len(kbound)):
-				pt_final[i,:] = np.interp(z, self.red, pt_temp[i,:])
+				#~ pt_final[i,:] = np.interp(z, self.red, pt_temp[i,:])
+				pt_final[i] = np.interp(z, self.red, pt_temp[i,:])
 				
 		return pt_final
 		
@@ -332,8 +302,23 @@ class BE_HaPPy(Likelihood):
 		
 #-----------------------------------------------------------------------
 
-	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt,\
-		AB2, AB4, AB6, AB8, A_shot):
+	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt, A_shot):
+			
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/TNS_coeff/'\
+		'AB_'+str(self.mbin)+'_'+str(self.bmodel)+'_z='+str(self.z)+'.txt')	
+		AB2 = np.zeros((len(kbound)))
+		AB4 = np.zeros((len(kbound)))
+		AB6 = np.zeros((len(kbound)))
+		AB8 = np.zeros((len(kbound)))
+		with open(dat_file_path,'r') as f: 
+			line = f.readline()
+			for index_k in range(len(kbound)):
+				AB2[index_k] = float(line.split()[0])
+				AB4[index_k] = float(line.split()[1])
+				AB6[index_k] = float(line.split()[2])
+				AB8[index_k] = float(line.split()[3])
+				line = f.readline()
+			
 		if self.fog == 1:
 			# compute the multipole expansion coefficients
 			kappa = np.zeros((len(kbound)))
@@ -357,11 +342,11 @@ class BE_HaPPy(Likelihood):
 				print 'you chose the Kaiser model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					Pred = Pmod_dd*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) + A_shot
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC + A_shot
+					Pred = Pmod_dd*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) + A_shot
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
@@ -370,7 +355,7 @@ class BE_HaPPy(Likelihood):
 				print 'you chose the Scoccimaro model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt + A_shot
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
@@ -388,14 +373,14 @@ class BE_HaPPy(Likelihood):
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = PsptD1z*coeffA + 2/3.*fcc*PsptT*coeffB + 1/5.*fcc**2*Pmod_tt*coeffC \
-			+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
+					Pred = b**2*Pmod_dd*coeffA + 2/3.*b*fz*Pmod_dt*coeffB + 1/5.*fz**2*Pmod_tt*coeffC \
+					+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 					
 				elif self.bmodel == 3:
 					# here b3 == bs and b4 == b3nl
 					PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
 					2*b1*b4*F 
-					PhhDT = b1* Pmod_dt + b2*G + bs*H + b3nl*F 
+					PhhDT = b1* Pmod_dt + b2*G + b3*H + b4*F 
 					Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
 					+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
 						
@@ -405,11 +390,11 @@ class BE_HaPPy(Likelihood):
 				print 'you chose the Kaiser model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2 + 2/3.*b*fz + 1/5.*fz**2
+					Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2) + A_shot
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2 + 2/3.*b*fz + 1/5.*fz**2 + A_shot
+					Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2 )+ A_shot
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
@@ -418,7 +403,7 @@ class BE_HaPPy(Likelihood):
 				print 'you chose the Scoccimaro model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt + A_shot
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
@@ -432,18 +417,18 @@ class BE_HaPPy(Likelihood):
 				if self.bmodel == 1:
 					b = b1
 					Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
-					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8)
+					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) + A_shot
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = PsptD1z + 2/3.*fcc*PsptT + 1/5.*fcc**2*Pmod_tt \
-			+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8)
+					Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
+					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) + A_shot
 					
 				elif self.bmodel == 3:
 					# here b3 == bs and b4 == b3nl
 					PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
 					2*b1*b4*F 
-					PhhDT = b1* Pmod_dt + b2*G + bs*H + b3nl*F 
+					PhhDT = b1* Pmod_dt + b2*G + b3*H + b4*F 
 					Pred = PhhDD  + 2/3.*fz*PhhDT + 1/5.*fz**2*Pmod_tt + 1/3.*AB2 \
 					+ 1/5.*AB4 + 1/7.*AB6 + 1/9.*AB8 + A_shot
 			
