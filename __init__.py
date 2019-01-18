@@ -64,7 +64,7 @@ class BE_HaPPy(Likelihood):
 		# variables
 		A_shot = (data.mcmc_parameters['A_shot']['current'] *
 		data.mcmc_parameters['A_shot']['scale'])
-		
+		print self.z
 		####################################################################
 		####################################################################
 		#### import classy results
@@ -77,6 +77,7 @@ class BE_HaPPy(Likelihood):
 		#~ if len(self.z)>0:
 		if self.z:
 			redshift = self.z
+			print 'popo'
 		#--------------------------------------------
 		try:
 			self.redshift
@@ -173,41 +174,42 @@ class BE_HaPPy(Likelihood):
 		b1, b2, b3, b4 = self.bcoeff(self.z)
 		
 		# compute tns coeff
+		# set the parameters for the power spectrum window and
+		# Fourier coefficient window 
+		#P_window=np.array([.2,.2])  
+		C_window=0.95
+
+		# padding length 
+		nu=-2; n_pad=len(kbound)
+		n_pad=int(0.5*len(kbound))
+		to_do=['all']
+						
+		# initialize the FASTPT class 
+		# including extrapolation to higher and lower k  
+		# time the operation
+		fastpt=FPT.FASTPT(kbound,to_do=to_do,n_pad=n_pad, verbose=True) 
+		
 		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
+		
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/TNS_coeff/'\
+				'AB_'+str(self.mbin)+'_'+str(self.bmodel)+'_z='+str(self.z)+'.txt')
+		with open(dat_file_path, 'w+') as fid_file:
+			for index_k in xrange(len(kbound)):
+				fid_file.write('%.8g %.8g %.8g %.8g\n' % ( AB2[index_k], AB4[index_k], AB6[index_k], AB8[index_k]))
+		fid_file.close()
 		
 		####################################################################
 		####################################################################
 		### compute the redshift power spectrum
 		
-		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt)
+		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt,\
+		AB2, AB4, AB6, AB8)
 
 		kill
-			
 
 		####################################################################
 		####################################################################
-		# compute the halo power spectrum given the coefficient
-		PhhDD = np.zeros((len(kbound)))
-		# density spectrum rescaled by transfer function from bcc ----> bmm
-		PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*bs*C + 1/2.*b2*bs*D + 1/4.*bs**2*E +\
-		2*b1*b3nl*F 
-	
-		# cross velocity spectrum
-		PhhDT = np.zeros((len(kbound)))
-		PhhDT = b1* Pmod_dt + b2*G + bs*H + b3nl*F 
-			
-		
-		
 
-		
-		
-		#~ kill
-		# compute ps in redshift space
-		Pred = np.zeros((len(kbound)))
-		Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
-		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
-		
-		
 		### interpolate data on kbound
 		if len(self.Psimu) != len(kbound):
 			self.Psimu = np.interp(kbound, self.ksimu, self.Psimu)
@@ -335,7 +337,8 @@ class BE_HaPPy(Likelihood):
 		
 #-----------------------------------------------------------------------
 
-	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt):
+	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt,\
+		AB2, AB4, AB6, AB8):
 		if self.fog == 1:
 			# compute the multipole expansion coefficients
 			kappa = np.zeros((len(kbound)))
@@ -363,7 +366,7 @@ class BE_HaPPy(Likelihood):
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC + A_shot
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
@@ -376,7 +379,7 @@ class BE_HaPPy(Likelihood):
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt + A_shot
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
@@ -385,55 +388,69 @@ class BE_HaPPy(Likelihood):
 				print 'you chose the TNS model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
+					Pred = b**2*Pmod_dd*coeffA + 2/3.*b*fz*Pmod_dt*coeffB + 1/5.*fz**2*Pmod_tt*coeffC \
+					+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
+					Pred = PsptD1z*coeffA + 2/3.*fcc*PsptT*coeffB + 1/5.*fcc**2*Pmod_tt*coeffC \
+			+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 					
 				elif self.bmodel == 3:
-					raise ValueError('Sorry combination not available')	elif self.rsd == 4:
+					# here b3 == bs and b4 == b3nl
+					PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
+					2*b1*b4*F 
+					PhhDT = b1* Pmod_dt + b2*G + bs*H + b3nl*F 
+					Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
+					+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
 						
-						
-				print 'you chose the eTNS model'
-				dim = np.shape(P_halo)
-				Pred = np.zeros(dim)
-				for iz in xrange(znumber):
-					for count,j in enumerate(Massbins):
-						#~ ind2 = mbins.index(j)
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz]  + 2/3.*f[iz]*PhhDT[:,iz,count]*coeffB[:,iz] \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
-						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
 		#------------
 		else:
 			if self.rsd == 1:
 				print 'you chose the Kaiser model'
-				for iz in xrange(znumber):
-					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz] + 1/5.*f[iz]**2
+				if self.bmodel == 1:
+					b = b1
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz + 1/5.*fz**2
+					
+				elif self.bmodel == 2:
+					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz + 1/5.*fz**2 + A_shot
+					
+				elif self.bmodel == 3:
+					raise ValueError('Sorry combination not available')
+					
 			elif self.rsd == 2:
 				print 'you chose the Scoccimaro model'
-				for iz in xrange(znumber):
-					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]\
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]
+				if self.bmodel == 1:
+					b = b1
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt
+					
+				elif self.bmodel == 2:
+					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt + A_shot
+					
+				elif self.bmodel == 3:
+					raise ValueError('Sorry combination not available')
+	
 			elif self.rsd == 3:
 				print 'you chose the TNS model'
-				for iz in xrange(znumber):
-					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]  + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]\
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz] + 1/3.*AB2[:,iz,count]+ 1/5.*AB4[:,iz,count]\
-						+ 1/7.*AB6[:,iz,count]+ 1/9.*AB8[:,iz,count]
-			elif self.rsd == 4:
-				print 'you chose the eTNS model'
-				dim = np.shape(P_halo)
-				Pred = np.zeros(dim)
-				for iz in xrange(znumber):
-					for count,j in enumerate(Massbins):
-						#~ ind2 = mbins.index(j)
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz]  + 2/3.*f[iz]*PhhDT[:,iz,count]*coeffB[:,iz] \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
-						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
+				if self.bmodel == 1:
+					b = b1
+					Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
+					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8)
+					
+				elif self.bmodel == 2:
+					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+					Pred = PsptD1z + 2/3.*fcc*PsptT + 1/5.*fcc**2*Pmod_tt \
+			+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8)
+					
+				elif self.bmodel == 3:
+					# here b3 == bs and b4 == b3nl
+					PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
+					2*b1*b4*F 
+					PhhDT = b1* Pmod_dt + b2*G + bs*H + b3nl*F 
+					Pred = PhhDD  + 2/3.*fz*PhhDT + 1/5.*fz**2*Pmod_tt + 1/3.*AB2 \
+					+ 1/5.*AB4 + 1/7.*AB6 + 1/9.*AB8 + A_shot
 			
 		return Pred
 	
