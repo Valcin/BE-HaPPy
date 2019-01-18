@@ -140,11 +140,6 @@ class BE_HaPPy(Likelihood):
 		
 		### rescale the amplitude of pk_lin accoridngly
 		pk_lin *= h**3 
-		
-		#### get the non linear power spectrum from class
-		#~ pk = np.zeros((len(kbound)), 'float64')
-		#~ for ik in xrange(len(kbound)):
-			#~ pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
 		#~ fz = Omega_m**0.55
@@ -177,6 +172,9 @@ class BE_HaPPy(Likelihood):
 		
 		b1, b2, b3, b4 = self.bcoeff(self.z)
 		
+		# compute tns coeff
+		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
+		
 		####################################################################
 		####################################################################
 		### compute the redshift power spectrum
@@ -199,8 +197,7 @@ class BE_HaPPy(Likelihood):
 		PhhDT = b1* Pmod_dt + b2*G + bs*H + b3nl*F 
 			
 		
-		# compute tns coeff  and interpolate on z	
-		AB2, AB4, AB6, AB8 = fastpt.RSD_ABsum_components(pk_lin,fz,b1,C_window=C_window)
+		
 
 		
 		
@@ -375,23 +372,29 @@ class BE_HaPPy(Likelihood):
 				print 'you chose the Scoccimaro model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = pk_lin*b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
 	
 			elif self.rsd == 3:
 				print 'you chose the TNS model'
-				for iz in xrange(znumber):
-					for count,j in enumerate(Massbins):
-						Pred[:,iz,count] = P_halo[:,iz,count]*coeffA[:,iz] + 2/3.*bmm[:,iz, count]*f[iz]*Pmod_dt[:,iz]*coeffB[:,iz] \
-						+ 1/5.*f[iz]**2*Pmod_tt[:,iz]*coeffC[:,iz] + 1/3.*AB2[:,iz,count]*coeffB[:,iz] \
-						+ 1/5.*AB4[:,iz,count]*coeffC[:,iz] + 1/7.*AB6[:,iz,count]*coeffD[:,iz] + 1/9.*AB8[:,iz,count]*coeffE[:,iz]
-			elif self.rsd == 4:
+				if self.bmodel == 1:
+					b = b1
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
+					
+				elif self.bmodel == 2:
+					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt
+					
+				elif self.bmodel == 3:
+					raise ValueError('Sorry combination not available')	elif self.rsd == 4:
+						
+						
 				print 'you chose the eTNS model'
 				dim = np.shape(P_halo)
 				Pred = np.zeros(dim)

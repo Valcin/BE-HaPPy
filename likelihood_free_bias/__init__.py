@@ -127,10 +127,6 @@ class BE_HaPPy(Likelihood):
 		print blabla.get('m_ncdm_tot')
 		print blabla.get('m_ncdm_tot')/h**2/93.14 + Omega_b + Omega_cdm
 
-		#### get the linear power spectrum from class
-		#~ pk_lin = np.zeros((len(kclass)), 'float64')
-		#~ for ik in xrange(len(kclass)):
-			#~ pk_lin[ik] = cosmo.pk_lin(kclass[ik]*h, self.z)
 		
 		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
 		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
@@ -148,11 +144,6 @@ class BE_HaPPy(Likelihood):
 		
 		### rescale the amplitude of pk_lin accoridngly
 		pk_lin *= h**3 
-		
-		#### get the non linear power spectrum from class
-		#~ pk = np.zeros((len(kbound)), 'float64')
-		#~ for ik in xrange(len(kbound)):
-			#~ pk[ik] = cosmo.pk(kbound[ik], self.z)
 				
 		#### Define the linear growth factor and growth rate (growth factor f in class)
 		#~ fz = Omega_m**0.55
