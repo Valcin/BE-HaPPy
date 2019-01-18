@@ -69,26 +69,21 @@ class BE_HaPPy(Likelihood):
 		####################################################################
 		#### import classy results
 		#### import the requested redshift(s) 
-		try:
-			self.z
-		except:
-			self.z = False
-
-		#~ if len(self.z)>0:
-		if self.z:
+		if self.z == 0:
 			redshift = self.z
-			print 'popo'
-		#--------------------------------------------
-		try:
-			self.redshift
-		except:
-			self.redshift = False
+		else:
+			try:
+				self.z
+			except:
+				self.z = False
 
-		if self.redshift:
-			redshift = self.redshift
-		#--------------------------------------------
-		if not self.z and not self.redshift:
-			raise ValueError('Please define redshift(s) named redshift or z')
+			if self.z:
+				redshift = self.z
+				
+			if not self.z:
+				raise ValueError('Please define redshift(s)')
+
+		
 		
 
 		#### Store the selected redshifts in a array and deduce its length for the loops
@@ -203,7 +198,7 @@ class BE_HaPPy(Likelihood):
 		### compute the redshift power spectrum
 		
 		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt,\
-		AB2, AB4, AB6, AB8)
+		AB2, AB4, AB6, AB8, A_shot)
 
 		kill
 
@@ -338,7 +333,7 @@ class BE_HaPPy(Likelihood):
 #-----------------------------------------------------------------------
 
 	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt,\
-		AB2, AB4, AB6, AB8):
+		AB2, AB4, AB6, AB8, A_shot):
 		if self.fog == 1:
 			# compute the multipole expansion coefficients
 			kappa = np.zeros((len(kbound)))

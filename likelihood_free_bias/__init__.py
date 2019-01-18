@@ -73,25 +73,19 @@ class BE_HaPPy(Likelihood):
 		####################################################################
 		#### import classy results
 		#### import the requested redshift(s) 
-		try:
-			self.z
-		except:
-			self.z = False
-
-		#~ if len(self.z)>0:
-		if self.z:
+		if self.z == 0:
 			redshift = self.z
-		#--------------------------------------------
-		try:
-			self.redshift
-		except:
-			self.redshift = False
+		else:
+			try:
+				self.z
+			except:
+				self.z = False
 
-		if self.redshift:
-			redshift = self.redshift
-		#--------------------------------------------
-		if not self.z and not self.redshift:
-			raise ValueError('Please define redshift(s) named redshift or z')
+			if self.z:
+				redshift = self.z
+				
+			if not self.z:
+				raise ValueError('Please define redshift(s)')
 		
 
 		#### Store the selected redshifts in a array and deduce its length for the loops
