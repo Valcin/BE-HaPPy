@@ -156,7 +156,7 @@ class BE_HaPPy(Likelihood):
 		# initialize the FASTPT class 
 		# including extrapolation to higher and lower k  
 		# time the operation
-		fastpt=FPT.FASTPT(kbound,to_do=to_do,n_pad=n_pad, verbose=True) 
+		fastpt=FPT.FASTPT(kbound,to_do=to_do,n_pad=n_pad, verbose=False) 
 			
 		# calculate 1loop SPT (and time the operation) for density
 		P_spt_dd=fastpt.one_loop_dd(pk_lin,C_window=C_window)
