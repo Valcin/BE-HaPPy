@@ -37,10 +37,32 @@ class BE_HaPPy(Likelihood):
 		self.lred = len(self.red) 
 		ind = self.red.index(self.z)
 		
+		print 'Total neutrino mass is ' + str(self.Mnu)+'eV'
+		print 'you chose the mass bin M' + str(self.mbin +1)
+		if self.rsd == 1:
+				print 'you chose the Kaiser model'
+		elif self.rsd == 2:
+				print 'you chose the Scoccimaro model'
+		elif self.rsd == 3:
+				print 'you chose the TNS model'
+		if self.bmodel == 1:
+			print 'you chose the linear bias'
+		elif self.bmodel == 2:
+			print 'you chose the polynomial bias'
+		elif self.bmodel == 3:
+			print 'you chose the perturbation theory bias'
+		print ('')
+		
 		#### load halo redshift space ps
 		### for test
+		#~ if err == True:
+			#~ if mv == 0.0 or mv == 0.15:
+				#~ error.error(self, data, kclass, Phhbis, redshift, mv, Massbins)
+			#~ else:
+				#~ raise ValueError('the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry')
+		#~ if self.Mnu != 0.0 or self.Mnu != 0.15:
+				#~ raise ValueError('the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry')
 		self.data_directory = data.path['root']
-		print self.data_directory
 		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/codes/analysis')
 		sys.path.append(dat_file_path)
 		from load_data import ld_data
@@ -49,11 +71,19 @@ class BE_HaPPy(Likelihood):
 		errPr4, kclass, Tm, Tcb, noise1, noise2, noise3, noise4 = ld_data(self.Mnu, self.red, ind)
 		
 		self.ksimu = k
-		self.Psimu = Pmono1
-		self.err = errPr1
+		if self.mbin == 0:
+			self.Psimu = Pmono1
+			self.err = errPr1
+		elif self.mbin == 1:
+			self.Psimu = Pmono2
+			self.err = errPr2
+		elif self.mbin == 2:
+			self.Psimu = Pmono3
+			self.err = errPr3
+		elif self.mbin == 3:
+			self.Psimu = Pmono4
+			self.err = errPr4
 		
-		#~ THINK OF HST PRIORS
-		# Else the file will be created in the loglkl() function.
 		return
 
 	def loglkl(self, cosmo, data):
@@ -64,6 +94,7 @@ class BE_HaPPy(Likelihood):
 		# variables
 		A_shot = (data.mcmc_parameters['A_shot']['current'] *
 		data.mcmc_parameters['A_shot']['scale'])
+		
 		
 		####################################################################
 		####################################################################
@@ -119,7 +150,7 @@ class BE_HaPPy(Likelihood):
 		if self.cdm == 0:
 			pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
 		elif self.cdm == 1:
-			pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) # if we want Pcb
+			pk_lin = cosmo.get_pk_cb_array(kbound*h, redshift, len(kbound), znumber, 0) # if we want Pcb
 			
 		
 		### compare classy amplitude with classy
@@ -166,9 +197,16 @@ class BE_HaPPy(Likelihood):
 		
 		####################################################################
 		####################################################################
+		### load bias coefficients
+
+		alpha  = self.rescaling()
+		
+		
+		####################################################################
+		####################################################################
 		### compute the redshift power spectrum
 		
-		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt, A_shot)
+		Pred = self.red_ps(data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt, alpha)
 
 		####################################################################
 		####################################################################
@@ -179,19 +217,17 @@ class BE_HaPPy(Likelihood):
 			self.err = np.interp(kbound, self.ksimu, self.err)
 		
 		### plot to test
-		plt.plot(kbound, self.Psimu, c='b')
-		plt.plot(kbound, Pred, c='r')
-		plt.xscale('log')
-		plt.yscale('log')
-		plt.show()
+		#~ plt.plot(kbound, self.Psimu, c='b')
+		#~ plt.plot(kbound, Pred, c='r')
+		#~ plt.xscale('log')
+		#~ plt.yscale('log')
+		#~ plt.show()
 		
-		kill
 		
 		### compute the chi square
 		inv_sigma2 = 1.0/(self.err**2)
 		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
 			
-		print chi2
 		end = time.time()
 		print 'total time is '+str((end - start))
 		return -chi2
@@ -242,7 +278,6 @@ class BE_HaPPy(Likelihood):
 		b4_final = np.zeros(len(np.atleast_1d(z)))
 		
 		if self.bmodel == 1:
-			print 'you chose the linear bias'
 			for count,iz in enumerate(self.red):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/large_scale/'\
 				'LS_z='+str(iz)+'_.txt')
@@ -259,7 +294,6 @@ class BE_HaPPy(Likelihood):
 			return b1_final, b2_final, b3_final, b4_final # here b2_final, b3_final, b4_final == 0
 
 		elif self.bmodel == 2:
-			print 'you chose the polynomial bias'
 			for count,iz in enumerate(self.red):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
 				'/case'+str(self.kcase)+'/coeff_pl_0.0_z='+str(iz)+'.txt')
@@ -280,7 +314,6 @@ class BE_HaPPy(Likelihood):
 			return b1_final, b2_final, b3_final, b4_final
 
 		elif self.bmodel == 3:
-			print 'you chose the perturbation theory bias'
 			for count,iz in enumerate(self.red):
 				dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV'\
 				'/case'+str(self.kcase)+'/coeff_3exp_0.0_z='+str(iz)+'.txt')
@@ -302,7 +335,7 @@ class BE_HaPPy(Likelihood):
 		
 #-----------------------------------------------------------------------
 
-	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt, A_shot):
+	def red_ps(self,data, kbound, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt, Pmod_tt, alpha):
 			
 		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/TNS_coeff/'\
 		'AB_'+str(self.mbin)+'_'+str(self.bmodel)+'_z='+str(self.z)+'.txt')	
@@ -339,33 +372,30 @@ class BE_HaPPy(Likelihood):
 			coeffE = -4/10./kappa**2*(7.*coeffD - 2/(2+kappa**2))
 	
 			if self.rsd == 1:
-				print 'you chose the Kaiser model'
 				if self.bmodel == 1:
-					b = b1
-					Pred = Pmod_dd*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) + A_shot
+					b = b1 * alpha
+					Pred = Pmod_dd*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) 
 					
 				elif self.bmodel == 2:
-					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) + A_shot
+					b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+					Pred = Pmod_dd*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) 
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
 					
 			elif self.rsd == 2:
-				print 'you chose the Scoccimaro model'
 				if self.bmodel == 1:
-					b = b1
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt + A_shot
+					b = b1 * alpha
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt 
 					
 				elif self.bmodel == 2:
-					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt + A_shot
+					b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+					Pred = Pmod_dd*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt 
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
 	
 			elif self.rsd == 3:
-				print 'you chose the TNS model'
 				if self.bmodel == 1:
 					b = b1
 					Pred = b**2*Pmod_dd*coeffA + 2/3.*b*fz*Pmod_dt*coeffB + 1/5.*fz**2*Pmod_tt*coeffC \
@@ -382,47 +412,44 @@ class BE_HaPPy(Likelihood):
 					2*b1*b4*F 
 					PhhDT = b1* Pmod_dt + b2*G + b3*H + b4*F 
 					Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
-					+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
+					+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE 
 						
 		#------------
 		else:
 			if self.rsd == 1:
-				print 'you chose the Kaiser model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2) + A_shot
+					Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2) 
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2 )+ A_shot
+					Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2 )
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
 					
 			elif self.rsd == 2:
-				print 'you chose the Scoccimaro model'
 				if self.bmodel == 1:
 					b = b1
-					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt + A_shot
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt 
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
-					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt + A_shot
+					Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt 
 					
 				elif self.bmodel == 3:
 					raise ValueError('Sorry combination not available')
 	
 			elif self.rsd == 3:
-				print 'you chose the TNS model'
 				if self.bmodel == 1:
 					b = b1
 					Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
-					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) + A_shot
+					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) 
 					
 				elif self.bmodel == 2:
 					b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
 					Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
-					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) + A_shot
+					+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) 
 					
 				elif self.bmodel == 3:
 					# here b3 == bs and b4 == b3nl
@@ -430,9 +457,30 @@ class BE_HaPPy(Likelihood):
 					2*b1*b4*F 
 					PhhDT = b1* Pmod_dt + b2*G + b3*H + b4*F 
 					Pred = PhhDD  + 2/3.*fz*PhhDT + 1/5.*fz**2*Pmod_tt + 1/3.*AB2 \
-					+ 1/5.*AB4 + 1/7.*AB6 + 1/9.*AB8 + A_shot
+					+ 1/5.*AB4 + 1/7.*AB6 + 1/9.*AB8 
 			
 		return Pred
-	
+#-----------------------------------------------------------------------
 
+	def rescaling(self):
+		
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/0.0eV/large_scale/'\
+		'LS_z='+str(self.z)+'_.txt')
+		with open(dat_file_path,'r') as f: 
+				line = f.readline()   
+				bcc_LS000 = float(line.split()[self.mbin])
+				
+		
+		nu_masses = [0.03, 0.06, 0.1, 0.13, 0.15, 0.3, 0.45, 0.6]
+		bcc_massive = np.zeros((len(nu_masses)))
+		for count, mn in enumerate(nu_masses):
+			dat_file_path2 = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/other neutrinos masses/'+\
+			str(mn)+'eV/LS_z='+str(self.z)+'_.txt')
+			with open(dat_file_path2,'r') as f2: 
+				line2 = f2.readline()   
+				bcc_massive[count] = float(line2.split()[self.mbin])
+				
+		# interpolate on z
+		bcc_final = np.interp(self.Mnu, nu_masses, bcc_massive)/bcc_LS000
 
+		return bcc_final

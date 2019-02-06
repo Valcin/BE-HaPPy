@@ -115,11 +115,6 @@ class BE_HaPPy(Likelihood):
 		
 		Omega_k = cosmo.Omega0_k()
 		h = cosmo.h()
-		
-		
-		print h, Omega_m, Omega_b, Omega_cdm
-		print blabla.get('m_ncdm_tot')
-		print blabla.get('m_ncdm_tot')/h**2/93.14 + Omega_b + Omega_cdm
 
 		
 		kbound = np.logspace(np.log10(self.kmin), np.log10(self.kmax), self.kbins)
@@ -143,7 +138,6 @@ class BE_HaPPy(Likelihood):
 		#~ fz = Omega_m**0.55
 		fz = cosmo.scale_independent_growth_factor_f(self.z)
 		Dz = cosmo.scale_independent_growth_factor(self.z)
-		print fz, Dz
 		
 		####################################################################
 		####################################################################
@@ -252,7 +246,6 @@ class BE_HaPPy(Likelihood):
 			#~ inv_sigma2 = 1.0/(self.err**2)
 			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 )) - 1e6
 			
-		print chi2
 		end = time.time()
 		print 'total time is '+str((end - start))
 		return chi2
