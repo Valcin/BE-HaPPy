@@ -111,6 +111,7 @@ class BE_HaPPy(Likelihood):
 		Omega_cdm = cosmo.Omega_cdm()
 		Omega_m = cosmo.Omega_m()
 		Omega_Lambda = cosmo.Omega_Lambda()
+		
 		blabla = cosmo.get_current_derived_parameters(['m_ncdm_tot','m_ncdm_in_eV'])
 		
 		Omega_k = cosmo.Omega0_k()
@@ -122,8 +123,10 @@ class BE_HaPPy(Likelihood):
 		#### get the linear power spectrum from class. here multiply input k array by h because get_pk uses 1/mpc 
 		if self.cdm == 0:
 			pk_lin = cosmo.get_pk_array(kbound*h, redshift, len(kbound), znumber, 0) #if we want Pmm
+			sigma8 = cosmo.sigma8()
 		elif self.cdm == 1:
 			pk_lin = cosmo.get_pk_cb_array(kbound*h, redshift, len(kbound), znumber, 0) # if we want Pcb
+			sigma8 = cosmo.sigma8_cb()
 			
 		
 		### compare classy amplitude with classy
@@ -240,14 +243,14 @@ class BE_HaPPy(Likelihood):
 		
 		
 		### compute the chi square
-		inv_sigma2 = 1.0/(self.err**2)
-		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		#~ if 0.317 < Omega_m < 0.318:
-			#~ inv_sigma2 = 1.0/(self.err**2)
-			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 ))
-		#~ else:
-			#~ inv_sigma2 = 1.0/(self.err**2)
-			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 )) - 1e6
+		#~ inv_sigma2 = 1.0/(self.err**2)
+		#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
+		if 0.805 < sigma8 < 0.807:
+			inv_sigma2 = 1.0/(self.err**2)
+			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 ))
+		else:
+			inv_sigma2 = 1.0/(self.err**2)
+			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 )) - 1e6
 			
 		end = time.time()
 		print 'total time is '+str((end - start))
