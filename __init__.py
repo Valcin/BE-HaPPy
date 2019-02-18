@@ -233,24 +233,26 @@ class BE_HaPPy(Likelihood):
 			self.Psimu = np.interp(kbound, self.ksimu, self.Psimu)
 			self.err = np.interp(kbound, self.ksimu, self.err)
 		
-		### plot to test
+		#~ ### plot to test
 		#~ plt.plot(kbound, self.Psimu, c='b')
 		#~ plt.plot(kbound, Pred, c='r')
 		#~ plt.xscale('log')
 		#~ plt.yscale('log')
 		#~ plt.show()
 		
-		
+		limlim = np.where(kbound < 0.04)[0]
 		
 		### compute the chi square
-		#~ inv_sigma2 = 1.0/(self.err**2)
-		#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
-		if 0.805 < sigma8 < 0.807:
-			inv_sigma2 = 1.0/(self.err**2)
-			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 ))
-		else:
-			inv_sigma2 = 1.0/(self.err**2)
-			chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 )) - 1e6
+		inv_sigma2 = 1.0/(self.err**2)
+		chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 - np.log(inv_sigma2)))
+		#~ inv_sigma2 = 1.0/(self.err[limlim]**2)
+		#~ chi2 = -0.5*(np.sum((self.Psimu[limlim]-Pred[limlim])**2*inv_sigma2 - np.log(inv_sigma2)))
+		#~ if 0.805 < sigma8 < 0.807:
+			#~ inv_sigma2 = 1.0/(self.err**2)
+			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 ))
+		#~ else:
+			#~ inv_sigma2 = 1.0/(self.err**2)
+			#~ chi2 = -0.5*(np.sum((self.Psimu-Pred)**2*inv_sigma2 )) - 1e6
 			
 		end = time.time()
 		print 'total time is '+str((end - start))
