@@ -8,7 +8,7 @@ import matplotlib.colors as colors
 import scipy.interpolate as sp
 import pyximport
 pyximport.install()
-
+roots = '/home/david/codes/montepython_public/montepython/likelihoods/BE_HaPPy/coefficients/simu_ps/'
 
 def ld_data(mv, z, j):
 	
@@ -29,23 +29,23 @@ def ld_data(mv, z, j):
 
 
 	if mv == 0.0:
-
+		
 		#------------------------------------------------
 		#-------- data from scoccimaro 2004 -------------
 		#------------------------------------------------
-		scoccidd = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/delta.txt')
-		psdd = scoccidd[:,0]
-		ksdd = scoccidd[:,1]
-		scoccidt = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/deltheta.txt')
-		psdt = scoccidt[:,0]
-		ksdt = scoccidt[:,1]
-		scoccitt = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/theta.txt')
-		pstt = scoccitt[:,0]
-		kstt = scoccitt[:,1]
+		#~ scoccidd = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/delta.txt')
+		#~ psdd = scoccidd[:,0]
+		#~ ksdd = scoccidd[:,1]
+		#~ scoccidt = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/deltheta.txt')
+		#~ psdt = scoccidt[:,0]
+		#~ ksdt = scoccidt[:,1]
+		#~ scoccitt = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/theta.txt')
+		#~ pstt = scoccitt[:,0]
+		#~ kstt = scoccitt[:,1]
 
-		classS = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/test_pk.dat')
-		ks = classS[:,0]
-		pks = classS[:,1]
+		#~ classS = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class_scocci/test_pk.dat')
+		#~ ks = classS[:,0]
+		#~ pks = classS[:,1]
 		
 		#~ ksbis = np.logspace(np.log10(np.min(ks)),np.log10(np.max(ks)), 100)
 		#~ pksbis = np.interp(ksbis, ks,pks)
@@ -93,20 +93,20 @@ def ld_data(mv, z, j):
 		#~ #-------------------------------------------------
 		#~ #---------------- Camb ---------------------------
 		#~ #-------------------------------------------------
-		camb = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/CAMB/Pk_cb_z='+str(z[j])+'00.txt')
+		camb = np.loadtxt(roots + str(mv) +'eV/CAMB/Pk_cb_z='+str(z[j])+'00.txt')
 		kcamb = camb[:,0]
 		Pcamb = camb[:,1]
 		#~ Plin = Pcamb
 		#~ klin = kcamb
 		
-	
+		
 		#~ #-------------------------------------------------
 		#~ #---------------- Class ---------------------------
 		#~ #-------------------------------------------------
-		Class = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class/test_z'+str(j+1)+'_pk.dat')
+		Class = np.loadtxt(roots + str(mv) +'eV/CLASS/test_z'+str(j+1)+'_pk.dat')
 		kclass = Class[:,0]
 		Pclass = Class[:,1]
-		Class_trans = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class/test_z'+str(j+1)+'_tk.dat')
+		Class_trans = np.loadtxt(roots + str(mv) +'eV/CLASS/test_z'+str(j+1)+'_tk.dat')
 		Tb = Class_trans[:,2]
 		Tcdm = Class_trans[:,3]
 		Tm = Class_trans[:,5]
@@ -116,7 +116,7 @@ def ld_data(mv, z, j):
 		#-------------------------------------------------
 		#------------matter  Real space --------
 		#-------------------------------------------------
-		d = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Pcc_realisation_z='+str(z[j])+'.txt')
+		d = np.loadtxt(roots + str(mv) +'eV/Pcc_realisation_z='+str(z[j])+'.txt')
 		kmat = d[:,10]
 		Pmat = np.zeros((len(kmat),10))
 		for i in xrange(0,10):
@@ -127,7 +127,7 @@ def ld_data(mv, z, j):
 		#~ #--------- halo real space -------------------------
 		#~ #---------------------------------------------------
 		#first mass range
-		d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_z='+str(z[j])+'.txt')
+		d1 = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_z='+str(z[j])+'.txt')
 		k = d1[:,19]
 		Phh1 = np.zeros((len(k),10))
 		Pshot1 = np.zeros((10))
@@ -137,7 +137,7 @@ def ld_data(mv, z, j):
 			Phh1[:,i]= d1[:,pnum1[i]]
 			Pshot1[i]= d1[0,pnum2[i]]
 		# second mass range
-		d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_z='+str(z[j])+'.txt')
+		d2 = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_z='+str(z[j])+'.txt')
 		k = d2[:,19]
 		Phh2 = np.zeros((len(k),10))
 		Pshot2 = np.zeros((10))
@@ -147,7 +147,7 @@ def ld_data(mv, z, j):
 			Phh2[:,i]= d2[:,pnum1[i]]
 			Pshot2[i]= d2[0,pnum2[i]]
 		# third mass range
-		d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_z='+str(z[j])+'.txt')
+		d3 = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_z='+str(z[j])+'.txt')
 		k = d3[:,19]
 		Phh3 = np.zeros((len(k),10))
 		Pshot3 = np.zeros((10))
@@ -157,7 +157,7 @@ def ld_data(mv, z, j):
 			Phh3[:,i]= d3[:,pnum1[i]]
 			Pshot3[i]= d3[0,pnum2[i]]
 		# fourth mass range
-		d4 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_z='+str(z[j])+'.txt')
+		d4 = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_z='+str(z[j])+'.txt')
 		k = d4[:,19]
 		Phh4 = np.zeros((len(k),10))
 		Pshot4 = np.zeros((10))
@@ -407,9 +407,9 @@ def ld_data(mv, z, j):
 		#---------------------------------------------------
 		#------------ matter Redshift space -----
 		#---------------------------------------------------
-		d1 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Pcc_realisation_axis_0_z='+str(z[j])+'.txt')
-		d2 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Pcc_realisation_axis_1_z='+str(z[j])+'.txt')
-		d3 = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Pcc_realisation_axis_2_z='+str(z[j])+'.txt')
+		d1 = np.loadtxt(roots + str(mv) +'eV/Pcc_realisation_axis_0_z='+str(z[j])+'.txt')
+		d2 = np.loadtxt(roots + str(mv) +'eV/Pcc_realisation_axis_1_z='+str(z[j])+'.txt')
+		d3 = np.loadtxt(roots + str(mv) +'eV/Pcc_realisation_axis_2_z='+str(z[j])+'.txt')
 		kred = d[:,10]
 		Pmat_r1 = np.zeros((len(kmat),10))
 		Pmat_r2 = np.zeros((len(kmat),10))
@@ -429,18 +429,18 @@ def ld_data(mv, z, j):
 		#---------------------------------------------------
 		#--------- halo redshift space -------------------------
 		#---------------------------------------------------
-		d1a = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_red_axis_0_z='+str(z[j])+'.txt')
-		d1b = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_red_axis_0_z='+str(z[j])+'.txt')
-		d1c = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_red_axis_0_z='+str(z[j])+'.txt')
-		d1d = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_red_axis_0_z='+str(z[j])+'.txt')
-		d2a = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_red_axis_1_z='+str(z[j])+'.txt')
-		d2b = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_red_axis_1_z='+str(z[j])+'.txt')
-		d2c = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_red_axis_1_z='+str(z[j])+'.txt')
-		d2d = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_red_axis_1_z='+str(z[j])+'.txt')
-		d3a = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh1_realisation_red_axis_2_z='+str(z[j])+'.txt')
-		d3b = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh2_realisation_red_axis_2_z='+str(z[j])+'.txt')
-		d3c = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh3_realisation_red_axis_2_z='+str(z[j])+'.txt')
-		d3d = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/Phh4_realisation_red_axis_2_z='+str(z[j])+'.txt')
+		d1a = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_red_axis_0_z='+str(z[j])+'.txt')
+		d1b = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_red_axis_0_z='+str(z[j])+'.txt')
+		d1c = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_red_axis_0_z='+str(z[j])+'.txt')
+		d1d = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_red_axis_0_z='+str(z[j])+'.txt')
+		d2a = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_red_axis_1_z='+str(z[j])+'.txt')
+		d2b = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_red_axis_1_z='+str(z[j])+'.txt')
+		d2c = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_red_axis_1_z='+str(z[j])+'.txt')
+		d2d = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_red_axis_1_z='+str(z[j])+'.txt')
+		d3a = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_red_axis_2_z='+str(z[j])+'.txt')
+		d3b = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_red_axis_2_z='+str(z[j])+'.txt')
+		d3c = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_red_axis_2_z='+str(z[j])+'.txt')
+		d3d = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_red_axis_2_z='+str(z[j])+'.txt')
 
 
 		kx1a = d1a[:,19]
@@ -576,10 +576,10 @@ def ld_data(mv, z, j):
 		#-------------------------------------------------
 		#---------------- Class ---------------------------
 		#-------------------------------------------------
-		Class = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/class/test_z'+str(j+1)+'_pk.dat')
+		Class = np.loadtxt(roots + str(mv) +'eV/CLASS/test_z'+str(j+1)+'_pk.dat')
 		kclass = Class[:,0]
 		Pclass = Class[:,1]
-		Class_trans = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/class/test_z'+str(j+1)+'_tk.dat')
+		Class_trans = np.loadtxt(roots + str(mv) +'eV/CLASS/test_z'+str(j+1)+'_tk.dat')
 
 		ktrans = Class_trans[:,0]
 		Tb = Class_trans[:,2]
@@ -593,7 +593,7 @@ def ld_data(mv, z, j):
 		Pcc = Pclass * (Tcb/Tm)**2
 		Plin = Pcc
 		klin = kclass
-		with open('/home/david/codes/Paco/data2/0.15eV/Pcc_z='+str(z[j])+'_.txt', 'w+') as fid_file:
+		with open(roots + str(mv) +'eV/Pcc_z='+str(z[j])+'_.txt', 'w+') as fid_file:
 			for index_k in xrange(len(klin)):
 				fid_file.write('%.8g %.8g\n' % ( klin[index_k], Plin[index_k]))
 		fid_file.close()
@@ -601,7 +601,7 @@ def ld_data(mv, z, j):
 		#-------------------------------------------------
 		#---------------- Camb ---------------------------
 		#-------------------------------------------------
-		camb = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/CAMB/Pk_cb_z='+str(z[j])+'00.txt')
+		camb = np.loadtxt(roots + str(mv) +'eV/CAMB/Pk_cb_z='+str(z[j])+'00.txt')
 		kcamb = camb[:,0]
 		Pcamb = camb[:,1]
 		Plin = Pcamb
@@ -610,15 +610,15 @@ def ld_data(mv, z, j):
 	#~ #-----------------------------------------------------------------------
 		#~ #---------------- matter neutrino Real space ---------------------------
 		#~ #-----------------------------------------------------------------------
-		d = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/NCV1/analysis/Pk_c_z='+str(z[j])+'.txt')
-		e = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/NCV2/analysis/Pk_c_z='+str(z[j])+'.txt')
+		d = np.loadtxt(roots + str(mv) +'eV/NCV1/analysis/Pk_c_z='+str(z[j])+'.txt')
+		e = np.loadtxt(roots + str(mv) +'eV/NCV2/analysis/Pk_c_z='+str(z[j])+'.txt')
 		k1 = d[:,0]
 		p1 = d[:,1]
 		k2 = e[:,0]
 		p2 = e[:,1]
 
 
-		d = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Pcc_realisation_'+str(mv)+'_z='+str(z[j])+'.txt')
+		d = np.loadtxt(roots + str(mv) +'eV/Pcc_realisation_'+str(mv)+'_z='+str(z[j])+'.txt')
 		kmat = d[:,8]
 		Pmat = np.zeros((len(kmat),10))
 		for i in xrange(0,8):
@@ -631,7 +631,7 @@ def ld_data(mv, z, j):
 		#-----------------------------------------------------------------------
 		#---------------- halo neutrino Real space ---------------------------
 		#-----------------------------------------------------------------------
-		d1 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_0.15_z='+str(z[j])+'.txt')
+		d1 = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_0.15_z='+str(z[j])+'.txt')
 		k = d1[:,19]
 		Phh1 = np.zeros((len(k),10))
 		Pshot1 = np.zeros((10))
@@ -641,7 +641,7 @@ def ld_data(mv, z, j):
 			Phh1[:,i]= d1[:,pnum1[i]]
 			Pshot1[i]= d1[0,pnum2[i]]
 		# second mass range
-		d2 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_0.15_z='+str(z[j])+'.txt')
+		d2 = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_0.15_z='+str(z[j])+'.txt')
 		k = d2[:,19]
 		Phh2 = np.zeros((len(k),10))
 		Pshot2 = np.zeros((10))
@@ -651,7 +651,7 @@ def ld_data(mv, z, j):
 			Phh2[:,i]= d2[:,pnum1[i]]
 			Pshot2[i]= d2[0,pnum2[i]]
 		# third mass range
-		d3 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_0.15_z='+str(z[j])+'.txt')
+		d3 = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_0.15_z='+str(z[j])+'.txt')
 		k = d3[:,19]
 		Phh3 = np.zeros((len(k),10))
 		Pshot3 = np.zeros((10))
@@ -661,7 +661,7 @@ def ld_data(mv, z, j):
 			Phh3[:,i]= d3[:,pnum1[i]]
 			Pshot3[i]= d3[0,pnum2[i]]
 		# fourth mass range
-		d4 = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_0.15_z='+str(z[j])+'.txt')
+		d4 = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_0.15_z='+str(z[j])+'.txt')
 		k = d4[:,19]
 		Phh4 = np.zeros((len(k),10))
 		Pshot4 = np.zeros((10))
@@ -839,18 +839,18 @@ def ld_data(mv, z, j):
 		#-----------------------------------------------------------------------
 		#---------------- halo neutrino Redshift space ---------------------------
 		#-----------------------------------------------------------------------
-		d1a = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
-		d1b = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
-		d1c = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
-		d1d = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
-		d2a = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
-		d2b = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
-		d2c = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
-		d2d = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
-		d3a = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh1_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
-		d3b = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh2_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
-		d3c = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh3_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
-		d3d = np.loadtxt('/home/david/codes/Paco/data2/0.15eV/Phh4_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
+		d1a = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
+		d1b = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
+		d1c = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
+		d1d = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_red_axis_0_0.15_z='+str(z[j])+'.txt')
+		d2a = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
+		d2b = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
+		d2c = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
+		d2d = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_red_axis_1_0.15_z='+str(z[j])+'.txt')
+		d3a = np.loadtxt(roots + str(mv) +'eV/Phh1_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
+		d3b = np.loadtxt(roots + str(mv) +'eV/Phh2_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
+		d3c = np.loadtxt(roots + str(mv) +'eV/Phh3_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
+		d3d = np.loadtxt(roots + str(mv) +'eV/Phh4_realisation_red_axis_2_0.15_z='+str(z[j])+'.txt')
 
 
 		kx1a = d1a[:,19]

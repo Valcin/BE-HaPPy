@@ -28,9 +28,6 @@ class BE_HaPPy(Likelihood):
 		#~ #-------------------------------------------------
 		#~ #---------------- Data ---------------------------
 		#~ #-------------------------------------------------
-		Class = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/class/test_z2_pk.dat')
-		self.kclass = Class[:,0]
-		self.Pclass = Class[:,1]
 		
 		#### load halo redshift space ps
 		### for test
