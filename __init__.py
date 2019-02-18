@@ -14,6 +14,7 @@ sys.path.append('/home/david/codes/FAST-PT')
 import myFASTPT as FPT
 
 
+
 class BE_HaPPy(Likelihood):
 	def __init__(self, path, data, command_line):
 
@@ -35,7 +36,7 @@ class BE_HaPPy(Likelihood):
 		### for test
 		self.data_directory = data.path['root']
 		print self.data_directory
-		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/codes/analysis')
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/simu_ps')
 		sys.path.append(dat_file_path)
 		from load_data import ld_data
 		kcamb, Pcamb, k, Pmm, PH1, PH2, PH3 , PH4, errPhh1, errPhh2, errPhh3, errPhh4, bias1, bias2, bias3, bias4, \

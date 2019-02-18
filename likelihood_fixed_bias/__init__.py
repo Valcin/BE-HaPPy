@@ -4,9 +4,6 @@ import numpy as np
 import warnings
 from numpy import newaxis as na
 from math import exp, log, pi, log10
-#~ sys.path.append('/home/david/codes/BE_HaPPy')
-#~ from BE_HaPPy.bias import Halo
-#~ from BE_HaPPy.red_ps import rspec
 import time
 import math
 import sys
@@ -62,8 +59,9 @@ class BE_HaPPy(Likelihood):
 				#~ raise ValueError('the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry')
 		#~ if self.Mnu != 0.0 or self.Mnu != 0.15:
 				#~ raise ValueError('the simulation spectra are only available for Mv = 0.0 or 0.15eV sorry')
-		self.data_directory = data.path['root']
-		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/codes/analysis')
+				self.data_directory = data.path['root']
+		print self.data_directory
+		dat_file_path = os.path.join(self.data_directory, 'montepython/likelihoods/BE_HaPPy/coefficients/simu_ps')
 		sys.path.append(dat_file_path)
 		from load_data import ld_data
 		kcamb, Pcamb, k, Pmm, PH1, PH2, PH3 , PH4, errPhh1, errPhh2, errPhh3, errPhh4, bias1, bias2, bias3, bias4, \
