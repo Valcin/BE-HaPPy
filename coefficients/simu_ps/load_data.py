@@ -327,10 +327,10 @@ def ld_data(mv, z, j):
 		errPhh3 = np.std(Phh3[:,0:11], axis=1)
 		errPhh4 = np.std(Phh4[:,0:11], axis=1)
 		
-		noise1 = np.std(Pshot1[0:11])
-		noise2 = np.std(Pshot2[0:11])
-		noise3 = np.std(Pshot3[0:11])
-		noise4 = np.std(Pshot4[0:11])
+		noise1 = np.mean(Pshot1[0:11])
+		noise2 = np.mean(Pshot2[0:11])
+		noise3 = np.mean(Pshot3[0:11])
+		noise4 = np.mean(Pshot4[0:11])
 		
 		### smooth the curve
 		from scipy.signal import savgol_filter
@@ -829,10 +829,10 @@ def ld_data(mv, z, j):
 		errPhh3 = np.std(Phh3[:,0:11], axis=1)
 		errPhh4 = np.std(Phh4[:,0:11], axis=1)
 		
-		noise1 = np.std(Pshot1[0:11])
-		noise2 = np.std(Pshot2[0:11])
-		noise3 = np.std(Pshot3[0:11])
-		noise4 = np.std(Pshot4[0:11])
+		noise1 = np.mean(Pshot1[0:11])
+		noise2 = np.mean(Pshot2[0:11])
+		noise3 = np.mean(Pshot3[0:11])
+		noise4 = np.mean(Pshot4[0:11])
 		
 		
 		

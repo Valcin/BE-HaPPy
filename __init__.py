@@ -43,6 +43,9 @@ class BE_HaPPy(Likelihood):
 		self.ksimu = k
 		self.Psimu = Pmono1
 		self.err = errPr1
+		self.noise = noise1
+		print self.noise
+		kill
 		
 		#~ THINK OF HST PRIORS
 		# Else the file will be created in the loglkl() function.
@@ -223,7 +226,7 @@ class BE_HaPPy(Likelihood):
 		# compute ps in redshift space
 		Pred = np.zeros((len(kbound)))
 		Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
-		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot
+		+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE + A_shot 
 		
 		
 		### interpolate data on kbound
