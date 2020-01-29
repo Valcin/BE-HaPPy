@@ -1,6 +1,8 @@
 import numpy as np
 import os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
 def interpol_pt(pt_term, kbound, z, red, lred):
 	
 	size_k = 350 #size of the pt text file
@@ -9,7 +11,7 @@ def interpol_pt(pt_term, kbound, z, red, lred):
 	pt_temp = np.zeros((len(kbound),lred))
 	#~ pt_final = np.zeros((len(kbound),len(np.atleast_1d(z))))
 	pt_final = np.zeros((len(kbound)))
-	dir_path = os.path.dirname(os.path.realpath(__file__))
+
 
 	for count,iz in enumerate(red):
 		dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV'\
