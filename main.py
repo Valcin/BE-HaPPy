@@ -1,6 +1,7 @@
 from interpol import interpol_pt
 from coeff import bcoeff
 from rescaling import rescaling
+from real_ps import real_ps
 from power_spec import red_ps
 
 def ps_calc(kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, A_shot):
