@@ -85,20 +85,20 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 
 		elif rsd == 3:
 			if bmodel == 1:
-				b = b1
+				b = b1 * alpha
 				Pred = b**2*Pmod_dd*coeffA + 2/3.*b*fz*Pmod_dt*coeffB + 1/5.*fz**2*Pmod_tt*coeffC \
 				+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 				
 			elif bmodel == 2:
-				b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
 				Pred = b**2*Pmod_dd*coeffA + 2/3.*b*fz*Pmod_dt*coeffB + 1/5.*fz**2*Pmod_tt*coeffC \
 				+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 				
 			elif bmodel == 3:
 				# here b3 == bs and b4 == b3nl
-				PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
-				2*b1*b4*F 
-				PhhDT = b1* Pmod_dt + b2*G + b3*H + b4*F 
+				PhhDD = (b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
+				2*b1*b4*F )* alpha**2
+				PhhDT = (b1* Pmod_dt + b2*G + b3*H + b4*F) * alpha
 				Pred = PhhDD*coeffA  + 2/3.*fz*PhhDT*coeffB + 1/5.*fz**2*Pmod_tt*coeffC + 1/3.*AB2*coeffB \
 				+ 1/5.*AB4*coeffC + 1/7.*AB6*coeffD + 1/9.*AB8*coeffE 
 					
@@ -106,11 +106,11 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 	else:
 		if rsd == 1:
 			if bmodel == 1:
-				b = b1
+				b = b1* alpha
 				Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2) 
 				
 			elif bmodel == 2:
-				b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
 				Pred = Pmod_dd*(b**2 + 2/3.*b*fz + 1/5.*fz**2 )
 				
 			elif bmodel == 3:
@@ -118,11 +118,11 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				
 		elif rsd == 2:
 			if bmodel == 1:
-				b = b1
+				b = b1* alpha
 				Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt 
 				
 			elif bmodel == 2:
-				b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
 				Pred = Pmod_dd*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt 
 				
 			elif bmodel == 3:
@@ -130,20 +130,19 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 
 		elif rsd == 3:
 			if bmodel == 1:
-				b = b1
+				b = b1* alpha
 				Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
 				+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) 
 				
 			elif bmodel == 2:
-				b = b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4) 
+				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
 				Pred = b**2*Pmod_dd + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
 				+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) 
 				
 			elif bmodel == 3:
-				# here b3 == bs and b4 == b3nl
-				PhhDD = b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
-				2*b1*b4*F 
-				PhhDT = b1* Pmod_dt + b2*G + b3*H + b4*F 
+				PhhDD = (b1**2*Pmod_dd + b1*b2*A + 1/4.*b2**2*B + b1*b3*C + 1/2.*b2*b3*D + 1/4.*b3**2*E +\
+				2*b1*b4*F )*alpha**2
+				PhhDT = (b1* Pmod_dt + b2*G + b3*H + b4*F )*alpha
 				Pred = PhhDD  + 2/3.*fz*PhhDT + 1/5.*fz**2*Pmod_tt + 1/3.*AB2 \
 				+ 1/5.*AB4 + 1/7.*AB6 + 1/9.*AB8 
 		
