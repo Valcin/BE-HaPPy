@@ -24,12 +24,20 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 			line = f.readline()
 		
 	if fog == 1:
-		
-		mname = ['kai']
+		if rsd == 1:
+			mname = 'kai'
+		elif rsd == 2:
+			mname = 'sco'
+		elif rsd == 3 and bmodel == 1:
+			mname = 'tns'
+		elif rsd == 3 and bmodel == 2:
+			mname = 'tns'
+		elif rsd == 3 and bmodel == 3:
+			mname = 'etns'
 		if sigma_v == None:
 			for count,iz in enumerate(red):
 				dat_path = os.path.join(dir_path, 'coefficients/0.0eV'\
-				'/v_disp/case'+str(kcase)+'/vdisp'+mname[0]+'_z='+str(iz)+'.txt')
+				'/v_disp/case'+str(kcase)+'/vdisp'+mname+'_z='+str(iz)+'.txt')
 				with open(dat_file_path,'r') as f:
 					for i, line in enumerate(f):
 						if i == mbin: 

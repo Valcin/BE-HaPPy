@@ -4,21 +4,26 @@ from rescaling import rescaling
 from real_ps import real_ps
 from power_spec import red_ps
 
-def ps_calc(kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, A_shot):
-	print 'Total neutrino mass is ' + str(Mnu)+'eV'
-	print 'you chose the mass bin M' + str(mbin +1)
+def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, A_shot):
+	print('you chose: ')
+	if coord == 0:
+		print('- real space')
+	elif coord == 1:
+		print('- redshift space')
+	print('- Total neutrino mass = ' + str(Mnu)+'eV')
+	print('- the mass bin M' + str(mbin +1))
 	if rsd == 1:
-			print 'you chose the Kaiser model'
+			print( '- the Kaiser model')
 	elif rsd == 2:
-			print 'you chose the Scoccimaro model'
+			print('- the Scoccimaro model')
 	elif rsd == 3:
-			print 'you chose the TNS model'
+			print( '- the TNS model')
 	if bmodel == 1:
-		print 'you chose the linear bias'
+		print('- the linear bias')
 	elif bmodel == 2:
-		print 'you chose the polynomial bias'
+		print('- the polynomial bias')
 	elif bmodel == 3:
-		print 'you chose the perturbation theory bias'
+		print('- the perturbation theory bias')
 	print ('')
 	
 	
@@ -61,7 +66,10 @@ def ps_calc(kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, A_shot):
 	####################################################################
 	### compute the redshift power spectrum
 	
-	Pred = red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd,
+	if coord == 0:
+		Power = real_ps(mbin, bmodel, kbound, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, alpha)
+	elif coord == 1:
+		Power = red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd,
 	Pmod_dt, Pmod_tt, alpha, fog, A_shot, rsd, red, kcase)
 
-	return
+	return Power
