@@ -5,11 +5,11 @@ import math
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, Pmod_dt,
-	Pmod_tt, alpha, fog, A_shot, rsd, red, kcase, sigma_v = None):
+	Pmod_tt, alpha, fog, rsd, red, kcase, sigma_v = None):
 
 
 	dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV/TNS_coeff/'\
-	'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(z[0])+'.txt')	
+	'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(z)+'.txt')	
 	AB2 = np.zeros((len(kbound)))
 	AB4 = np.zeros((len(kbound)))
 	AB6 = np.zeros((len(kbound)))

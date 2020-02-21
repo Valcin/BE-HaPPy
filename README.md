@@ -2,21 +2,19 @@
 Bias Emulator for Halo Power Spectrum is a software designed to falicitate future large scale surveys analysis by providing an accurate, easy to use and computionally inexpensive method to compute the halo bias in the presence of massive neutrinos.
 
 
+1) You can download the folder or clone it from git url
+2) To import everywhere from your laptop i used sys.path.append('/path/to/directory/') in example.py
 
-solutions to make the code available in every folder:
------------------------------------------------------
-1) install in the directory where you want to use the code
-2) temporary solution sys.path.append('/path/to/directory/') in the python script where you want to import the code
-3) export the directory where you installed BE-HaPPy in your .bashrc file
+The code was written with python2 but it should be also compatible with python3
 
 dependencies
 -------------
 need numpy
 need scipy
-explain how to define nuisance parameter
-need mpk, mtk, halofit, 'z_max_pk': self.zmax
+need sys
+need os
 
-Redshift model
+Redshift models
 ---------------
 1. for kaiser
 2. for scoccimarro

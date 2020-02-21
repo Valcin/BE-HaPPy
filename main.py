@@ -4,7 +4,7 @@ from rescaling import rescaling
 from real_ps import real_ps
 from power_spec import red_ps
 
-def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, A_shot):
+def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog):
 	print('you chose: ')
 	if coord == 0:
 		print('- real space')
@@ -70,6 +70,6 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, A_shot)
 		Power = real_ps(mbin, bmodel, kbound, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, alpha)
 	elif coord == 1:
 		Power = red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd,
-	Pmod_dt, Pmod_tt, alpha, fog, A_shot, rsd, red, kcase)
+	Pmod_dt, Pmod_tt, alpha, fog, rsd, red, kcase)
 
 	return Power
