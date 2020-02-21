@@ -1,29 +1,41 @@
 # BE_HaPPy
-Bias Emulator for Halo Power Spectrum is a software designed to falicitate future large scale surveys analysis by providing an accurate, easy to use and computionally inexpensive method to compute the halo bias in the presence of massive neutrinos.
+Bias Emulator for Halo Power Spectrum is a software designed to facilitate future large scale surveys analysis by providing an accurate, easy to use and computionally inexpensive method to compute the halo bias in the presence of massive neutrinos.
 
 
 1) You can download the folder or clone it from git url
+
 2) To import everywhere from your laptop i used sys.path.append('/path/to/directory/') in example.py
 
-The code was written with python2 but it should be also compatible with python3
+The code was written with python2 but it should be also compatible with python3. The utilisation is simple, the user provides a linear Power Spectrum of his/her choice and the package will compute a new Power Spectrum according to the chosen configuration.
 
-dependencies
+
+Dependencies
 -------------
-need numpy \\
-need scipy
-need sys
-need os
+1. numpy
+2. scipy
+3. sys
+4. os
+
+Input linear Power Spectrum
+---------------------------
+By default the linear power spectrum provided is the one provided by Fast-PT equivalent by P_11. Instead the user can import the linear power spectrum of his/her choice. Some examples are provided in example.py
+
+Bias models
+---------------
+1. Linear
+2. Polynomial
+3. Perturbation theory
 
 Redshift models
 ---------------
-1. for kaiser
-2. for scoccimarro
-3. for tns
-4. for etns (only available for exp is chosen)
+1. Kaiser
+2. Scoccimarro
+3. TNS or eTNS (only available for the third bias model)
 
-fog
+
+Other available options
 -----
-veldisp range taken for hector gil marin Perturbation theory approach for the power spectrum: from dark matter in
-real space to massive haloes in redshift space
-euclid_pk.use_nuisance = ['P_shot','sigma_v']
-data.parameters['sigma_v'] = [6, 0, 12,0.01,1,'nuisance']
+1. Real or Redshift space
+2. The total neutrino mass
+3. velocity dispersion for Finger of God
+4. choice of mass bin or scale array

@@ -4,7 +4,7 @@ from rescaling import rescaling
 from real_ps import real_ps
 from power_spec import red_ps
 
-def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog):
+def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, sigma_v = None, Plin = None):
 	print('you chose: ')
 	if coord == 0:
 		print('- real space')
@@ -50,6 +50,9 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog):
 	G = interpol_pt(pt_terms[9], kbound, z, red, lred)
 	H = interpol_pt(pt_terms[10], kbound, z, red, lred)
 	
+	if Plin == None:
+		Plin = Pmod_dd
+	
 	####################################################################
 	####################################################################
 	### load bias coefficients
@@ -67,9 +70,9 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog):
 	### compute the redshift power spectrum
 	
 	if coord == 0:
-		Power = real_ps(mbin, bmodel, kbound, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd, alpha)
+		Power = real_ps(mbin, bmodel, kbound, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin, alpha)
 	elif coord == 1:
-		Power = red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Pmod_dd,
+		Power = red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin,
 	Pmod_dt, Pmod_tt, alpha, fog, rsd, red, kcase)
 
 	return Power
