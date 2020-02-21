@@ -1,3 +1,6 @@
+### code written by David Valcin
+### for calibration details see arXiv:1901.06045
+
 from interpol import interpol_pt
 from coeff import bcoeff
 from rescaling import rescaling

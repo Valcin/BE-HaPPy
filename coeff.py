@@ -1,3 +1,6 @@
+### code written by David Valcin
+### for calibration details see arXiv:1901.06045
+
 import numpy as np
 import os
 
@@ -28,8 +31,6 @@ def bcoeff(mbin, bmodel, z, red, lred, kcase):
 		b2_final = np.interp(z, red, b2)
 		b3_final = np.interp(z, red, b3)
 		b4_final = np.interp(z, red, b4)
-		
-		print(b1_final, b2_final, b3_final, b4_final)
 		
 		return b1_final, b2_final, b3_final, b4_final # here b2_final, b3_final, b4_final == 0
 

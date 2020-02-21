@@ -1,3 +1,6 @@
+### code written by David Valcin
+### for calibration details see arXiv:1901.06045
+
 import numpy as np
 import os
 import math

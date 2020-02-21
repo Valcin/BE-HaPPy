@@ -4,7 +4,7 @@ Bias Emulator for Halo Power Spectrum is a software designed to facilitate futur
 
 1) You can download the folder or clone it from git url
 
-2) To import everywhere from your laptop i used sys.path.append('/path/to/directory/') in example.py
+2) To import i used sys.path.append('/path/to/directory/') in example.py but it is better to had the path to your PYTHONPATH
 
 The code was written with python2 but it should be also compatible with python3. The utilisation is simple, the user provides a linear Power Spectrum of his/her choice and the package will compute a new Power Spectrum according to the chosen configuration.
 
@@ -41,3 +41,5 @@ Other available options
 2. The total neutrino mass
 3. velocity dispersion for Finger of God
 4. choice of mass bin or scale array
+
+Feel free to play with it and make any modifications you want. If you use the code, please cite JCAP 12(2019)057 or arXiv:1901.06045. Thank you !!!

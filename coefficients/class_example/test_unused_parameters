@@ -1,0 +1,12 @@
+# List of input/precision parameters passed
+# but not used (just for info)
+#
+non linear ic = PT
+number count contributions = density
+l_max_scalars = 3000
+l_max_tensors = 500
+selection = gaussian
+selection_mean = 2.
+selection_width = 0.5
+bessel file = yes
+bessels_verbose = 1
