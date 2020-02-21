@@ -29,6 +29,8 @@ def bcoeff(mbin, bmodel, z, red, lred, kcase):
 		b3_final = np.interp(z, red, b3)
 		b4_final = np.interp(z, red, b4)
 		
+		print(b1_final, b2_final, b3_final, b4_final)
+		
 		return b1_final, b2_final, b3_final, b4_final # here b2_final, b3_final, b4_final == 0
 
 	elif bmodel == 2:

@@ -4,7 +4,7 @@ from rescaling import rescaling
 from real_ps import real_ps
 from power_spec import red_ps
 
-def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, sigma_v = None, Plin = None):
+def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, karray, z, fog,  Plin = [] , sigma_v = [] , fz = None, Dz = None):
 	print('you chose: ')
 	if coord == 0:
 		print('- real space')
@@ -26,6 +26,7 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, sigma_v
 		print('- the perturbation theory bias')
 	print ('')
 	
+
 	
 	# store the calibrated redshift
 	red = [0.0,0.5,1.0,2.0] 
@@ -38,20 +39,19 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, sigma_v
 
 	pt_terms = ['Pmod_dd', 'Pmod_dt', 'Pmod_tt','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
-	Pmod_dd = interpol_pt(pt_terms[0], kbound, z, red, lred)
-	Pmod_dt = interpol_pt(pt_terms[1], kbound, z, red, lred)
-	Pmod_tt = interpol_pt(pt_terms[2], kbound, z, red, lred)
-	A = interpol_pt(pt_terms[3], kbound, z, red, lred)
-	B = interpol_pt(pt_terms[4], kbound, z, red, lred)
-	C = interpol_pt(pt_terms[5], kbound, z, red, lred)
-	D = interpol_pt(pt_terms[6], kbound, z, red, lred)
-	E = interpol_pt(pt_terms[7], kbound, z, red, lred)
-	F = interpol_pt(pt_terms[8], kbound, z, red, lred)
-	G = interpol_pt(pt_terms[9], kbound, z, red, lred)
-	H = interpol_pt(pt_terms[10], kbound, z, red, lred)
+	Pmod_dd = interpol_pt(pt_terms[0], karray, z, red, lred)
+	Pmod_dt = interpol_pt(pt_terms[1], karray, z, red, lred)
+	Pmod_tt = interpol_pt(pt_terms[2], karray, z, red, lred)
+	A = interpol_pt(pt_terms[3], karray, z, red, lred)
+	B = interpol_pt(pt_terms[4], karray, z, red, lred)
+	C = interpol_pt(pt_terms[5], karray, z, red, lred)
+	D = interpol_pt(pt_terms[6], karray, z, red, lred)
+	E = interpol_pt(pt_terms[7], karray, z, red, lred)
+	F = interpol_pt(pt_terms[8], karray, z, red, lred)
+	G = interpol_pt(pt_terms[9], karray, z, red, lred)
+	H = interpol_pt(pt_terms[10], karray, z, red, lred)
 	
-	if Plin == None:
-		Plin = Pmod_dd
+
 	
 	####################################################################
 	####################################################################
@@ -67,12 +67,25 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, kbound, z, fz, Dz, fog, sigma_v
 	
 	####################################################################
 	####################################################################
+	### define default parameters
+	if Plin == []:
+		Plin = Pmod_dd
+	if fz == None:
+		fvalues = [0.526, 0.760, 0.876, 0.957] #taken from class
+		fz = fvalues[ind]
+	if Dz == None:
+		dvalues = [0.769, 0.607, 0.417, 0.515]#taken from class
+		Dz = dvalues[ind]
+		
+	
+	####################################################################
+	####################################################################
 	### compute the redshift power spectrum
 	
 	if coord == 0:
-		Power = real_ps(mbin, bmodel, kbound, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin, alpha)
+		Power = real_ps(mbin, bmodel, karray, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin, alpha)
 	elif coord == 1:
-		Power = red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin,
+		Power = red_ps(mbin, bmodel, karray, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin,
 	Pmod_dt, Pmod_tt, alpha, fog, rsd, red, kcase)
 
 	return Power

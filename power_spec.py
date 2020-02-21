@@ -4,19 +4,19 @@ import math
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin, Pmod_dt,
-	Pmod_tt, alpha, fog, rsd, red, kcase, sigma_v = None):
+def red_ps(mbin, bmodel, karray, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin, Pmod_dt,
+	Pmod_tt, alpha, fog, rsd, red, kcase, sigma_v = []):
 
 
 	dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV/TNS_coeff/'\
 	'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(z)+'.txt')	
-	AB2 = np.zeros((len(kbound)))
-	AB4 = np.zeros((len(kbound)))
-	AB6 = np.zeros((len(kbound)))
-	AB8 = np.zeros((len(kbound)))
+	AB2 = np.zeros((len(karray)))
+	AB4 = np.zeros((len(karray)))
+	AB6 = np.zeros((len(karray)))
+	AB8 = np.zeros((len(karray)))
 	with open(dat_file_path,'r') as f: 
 		line = f.readline()
-		for index_k in range(len(kbound)):
+		for index_k in range(len(karray)):
 			AB2[index_k] = float(line.split()[0])
 			AB4[index_k] = float(line.split()[1])
 			AB6[index_k] = float(line.split()[2])
@@ -34,25 +34,25 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 			mname = 'tns'
 		elif rsd == 3 and bmodel == 3:
 			mname = 'etns'
-		if sigma_v == None:
-			for count,iz in enumerate(red):
-				dat_path = os.path.join(dir_path, 'coefficients/0.0eV'\
-				'/v_disp/case'+str(kcase)+'/vdisp'+mname+'_z='+str(iz)+'.txt')
-				with open(dat_file_path,'r') as f:
-					for i, line in enumerate(f):
-						if i == mbin: 
-							sigma_v = float(line.split()[i])
+
+		if sigma_v == []:
+			#~ for count,iz in enumerate(red):
+			dat_path = os.path.join(dir_path, 'coefficients/0.0eV'\
+			'/v_disp/case'+str(kcase)+'/vdisp'+mname+'_z='+str(z)+'.txt')
+			with open(dat_path,'r') as f:
+				for i, line in enumerate(f):
+						sigma_v = float(line.split()[mbin])
+							
 
 		# compute the multipole expansion coefficients
-		kappa = np.zeros((len(kbound)))
-		coeffA = np.zeros((len(kbound)))
-		coeffB = np.zeros((len(kbound)))
-		coeffC = np.zeros((len(kbound)))
-		coeffD = np.zeros((len(kbound)))
-		coeffE = np.zeros((len(kbound)))
-		
+		kappa = np.zeros((len(karray)))
+		coeffA = np.zeros((len(karray)))
+		coeffB = np.zeros((len(karray)))
+		coeffC = np.zeros((len(karray)))
+		coeffD = np.zeros((len(karray)))
+		coeffE = np.zeros((len(karray)))
 
-		kappa = kbound*sigma_v*fz*Dz
+		kappa = karray*sigma_v*fz*Dz
 		coeffA = np.arctan(kappa/math.sqrt(2))/(math.sqrt(2)*kappa) + 1/(2+kappa**2)
 		coeffB = 6/kappa**2*(coeffA - 2/(2+kappa**2))
 		coeffC = -10/kappa**2*(coeffB - 2/(2+kappa**2))
@@ -65,7 +65,7 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				Pred = Plin*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) 
 				
 			elif bmodel == 2:
-				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+				b = (b1 + b2*(karray**2) + b3*(karray**3) + b4*(karray**4))*alpha
 				Pred = Plin*(b**2*coeffA + 2/3.*b*fz*coeffB + 1/5.*fz**2*coeffC) 
 				
 			elif bmodel == 3:
@@ -77,7 +77,7 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				Pred = Plin*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt 
 				
 			elif bmodel == 2:
-				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+				b = (b1 + b2*(karray**2) + b3*(karray**3) + b4*(karray**4))*alpha
 				Pred = Plin*b**2*coeffA + 2/3.*b*fz*coeffB*Pmod_dt + 1/5.*fz**2*coeffC*Pmod_tt 
 				
 			elif bmodel == 3:
@@ -90,7 +90,7 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 				
 			elif bmodel == 2:
-				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+				b = (b1 + b2*(karray**2) + b3*(karray**3) + b4*(karray**4))*alpha
 				Pred = b**2*Plin*coeffA + 2/3.*b*fz*Pmod_dt*coeffB + 1/5.*fz**2*Pmod_tt*coeffC \
 				+ (1/3.*AB2*coeffB+ 1/5.*AB4*coeffC+ 1/7.*AB6*coeffD+ 1/9.*AB8*coeffE)
 				
@@ -110,7 +110,7 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				Pred = Plin*(b**2 + 2/3.*b*fz + 1/5.*fz**2) 
 				
 			elif bmodel == 2:
-				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+				b = (b1 + b2*(karray**2) + b3*(karray**3) + b4*(karray**4))*alpha
 				Pred = Plin*(b**2 + 2/3.*b*fz + 1/5.*fz**2 )
 				
 			elif bmodel == 3:
@@ -122,7 +122,7 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				Pred = Plin*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt 
 				
 			elif bmodel == 2:
-				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+				b = (b1 + b2*(karray**2) + b3*(karray**3) + b4*(karray**4))*alpha
 				Pred = Plin*b**2 + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt 
 				
 			elif bmodel == 3:
@@ -135,7 +135,7 @@ def red_ps(mbin, bmodel, kbound, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 				+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) 
 				
 			elif bmodel == 2:
-				b = (b1 + b2*(kbound**2) + b3*(kbound**3) + b4*(kbound**4))*alpha
+				b = (b1 + b2*(karray**2) + b3*(karray**3) + b4*(karray**4))*alpha
 				Pred = b**2*Plin + 2/3.*b*fz*Pmod_dt + 1/5.*fz**2*Pmod_tt \
 				+ (1/3.*AB2+ 1/5.*AB4+ 1/7.*AB6+ 1/9.*AB8) 
 				

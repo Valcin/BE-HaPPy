@@ -20,6 +20,8 @@ Input linear Power Spectrum
 ---------------------------
 By default the linear power spectrum provided is the one provided by Fast-PT equivalent by P_11. Instead the user can import the linear power spectrum of his/her choice. Some examples are provided in example.py
 
+For consistency it is better to Pcc or Pcb
+
 Bias models
 ---------------
 1. Linear
