@@ -9,7 +9,7 @@ The code was written with python2 but it should be also compatible with python3
 
 dependencies
 -------------
-need numpy
+need numpy \\
 need scipy
 need sys
 need os
