@@ -19,26 +19,26 @@ import matplotlib.pyplot as plt
 # real space or redshift space(0 or 1), 1 for redshift space
 coord = [0,1]
 #choice of k model between (1,2,3) cf paper
-kcase = '1'
+kcase = '2'
 # integration boundaries for k (in h/Mpc).
 # It has to be within the boundaries of the k model above, respectively 0.15, 0.2, 0.4
-kmin = 0.01
-kmax = 0.15
-kbins = 60
+kmin = 0.0001
+kmax = 0.2
+kbins = 100
 
 # desired redshift among the list [0.0, 0.5, 1.0, 2.0] for now. Interpolation might be added later
-z = 0.5
+z = 1.5
 # choice of neutrino mass between [0.0 - 0.6]eV
 Mnu = 0.0
 #choice of mass bins between (0,1,2,3) cf paper
 mbin = 0
 # choice of bias model between (1,2,3) cf paper: linear, polynomial, perturbation theory
-bias_model = 1
+bias_model = 3
 #choice of RSD model between (1,2,3) cf paper
-rsd = 1
+rsd = 3
 # whether or not to include FoG (0 or 1), 1 for yes. sigma_v is defined with a default value fitted with the
 # coefficients but the user can use different values
-fog = 1
+fog = 0
 #sigma_v = [7.0, 7.0, 7.0, 7.0]
 
 
@@ -52,8 +52,8 @@ fog = 1
 znumber = 1
 zmax = 2 # needed for transfer
 
-params = {'output': 'mPk mTk', 'z_max_pk': zmax, 'non linear': 'halofit', 'A_s': 2.13177e-9,
-		'n_s': 0.9624, 'h': 0.6711, 'omega_b': 2.2068e-2, 'omega_cdm': 0.1194}
+params = {'output': 'mPk mTk', 'z_max_pk': zmax, 'non linear': 'halofit', 'sigma8': 0.79,
+		'n_s': 0.95, 'h': 0.7, 'omega_b': 0.023, 'Omega_cdm': 0.1093, 'Omega_Lambda' : 0.73}
 
 # Create an instance of the CLASS wrapper
 cosmo = Class()
@@ -67,12 +67,12 @@ h = cosmo.h()
 fz = cosmo.scale_independent_growth_factor_f(z)
 Dz = cosmo.scale_independent_growth_factor(z)
 karray = np.logspace(np.log10(kmin), np.log10(kmax), kbins)
+karray = np.loadtxt('Pk_linear_z0(1)')[:,0]
 #~ Plin = cosmo.get_pk_cb_array(karray*h, np.array([z]), len(karray), znumber, 0) # if we want Pcb
 Plin = np.zeros(len(karray))
 for i,k in enumerate(karray) :
-	Plin[i] = (cosmo.pk(k ,0.)) # function .pk(k,z)
+	Plin[i] = (cosmo.pk(k ,z)) # function .pk(k,z)
 	
-print(Plin)
 ########################################################################
 ########################################################################
 ### Compute the non linear power spectrum
@@ -83,12 +83,18 @@ print(Plin)
 
 # A summary of your configuration is printed in the terminal
 P1 = ps_calc(coord[0],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, fz, Dz)
-P2 = ps_calc(coord[1],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, fz, Dz)
+#~ P2 = ps_calc(coord[1],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, fz, Dz)
 
+
+### save results
+#~ for j in range(len(karray)):
+	#~ with open('Pk_z'+str(z)+'_M'+str(mbin+1)+'.txt', 'a+') as fid_file:
+		#~ fid_file.write('%.8g %.8g\n' % (karray[j], P1[j]))
 
 plt.figure()
+plt.plot(karray, Plin, label ='class')
 plt.plot(karray, P1, label ='real space ps '+str(bias_model)+'-'+str(rsd))
-plt.plot(karray, P2, label ='redshift space ps '+str(bias_model)+'-'+str(rsd))
+#~ plt.plot(karray, P2, label ='redshift space ps '+str(bias_model)+'-'+str(rsd))
 plt.axvline(kmax, c='k', label='k max')
 plt.title('The total neutrino mass is '+str(Mnu))
 plt.legend(loc='upper right')

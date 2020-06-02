@@ -6,9 +6,11 @@ from coeff import bcoeff
 from rescaling import rescaling
 from real_ps import real_ps
 from power_spec import red_ps
+import numpy as np
 
 def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, karray, z, fog,  Plin = [] , sigma_v = [] , fz = None, Dz = None):
 	print('you chose: ')
+	print('- z = '+str(z))
 	if coord == 0:
 		print('- real space')
 	elif coord == 1:
@@ -34,7 +36,6 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, karray, z, fog,  Plin = [] , si
 	# store the calibrated redshift
 	red = [0.0,0.5,1.0,2.0] 
 	lred = len(red) 
-	ind = red.index(z)
 	
 	####################################################################
 	####################################################################
@@ -66,7 +67,7 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, karray, z, fog,  Plin = [] , si
 	####################################################################
 	### compute the neutrino rescaling coefficient
 
-	alpha  = rescaling(z, mbin, Mnu)
+	alpha  = rescaling(z, red, mbin, Mnu)
 	
 	####################################################################
 	####################################################################
@@ -75,10 +76,10 @@ def ps_calc(coord,kcase, Mnu, mbin, rsd, bmodel, karray, z, fog,  Plin = [] , si
 		Plin = Pmod_dd
 	if fz == None:
 		fvalues = [0.526, 0.760, 0.876, 0.957] #taken from class
-		fz = fvalues[ind]
+		fz = np.interp(z,red,fvalues)
 	if Dz == None:
 		dvalues = [0.769, 0.607, 0.417, 0.515]#taken from class
-		Dz = dvalues[ind]
+		Dz = np.interp(z,red,dvalues)
 		
 	
 	####################################################################
