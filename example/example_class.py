@@ -67,7 +67,6 @@ h = cosmo.h()
 fz = cosmo.scale_independent_growth_factor_f(z)
 Dz = cosmo.scale_independent_growth_factor(z)
 karray = np.logspace(np.log10(kmin), np.log10(kmax), kbins)
-karray = np.loadtxt('Pk_linear_z0(1)')[:,0]
 #~ Plin = cosmo.get_pk_cb_array(karray*h, np.array([z]), len(karray), znumber, 0) # if we want Pcb
 Plin = np.zeros(len(karray))
 for i,k in enumerate(karray) :
@@ -103,3 +102,4 @@ plt.ylabel(r'Pk $[h^3/ Mpc^{-3}]$')
 plt.xscale('log')
 plt.yscale('log')
 plt.show()
+plt.close()
