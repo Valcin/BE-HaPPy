@@ -5,36 +5,88 @@ import numpy as np
 import os
 import math
 import numpy as np
-
+import sys
+sys.path.append('/home/david/codes/FAST-PT')
+import myFASTPT as FPT
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def red_ps(mbin, bmodel, karray, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G, H, Plin, Pmod_dt,
 	Pmod_tt, alpha, fog, rsd, red, kcase, sigma_v = []):
 
+	####################################################################
+	###### fit the Finger of God effect
+	####################################################################
+	#~ kbis = np.logspace(np.log10(np.min(kcamb)), np.log10(np.max(kcamb)), 200)
+	#~ Plinbis = np.interp(kbis, k, Plin)
+
+	#### compute tns coefficeints given mcmc results
+	# set the parameters for the power spectrum window and
+	# Fourier coefficient window 
+	#P_window=np.array([.2,.2])  
+	#~ C_window=0.95
+	
+	#~ for j in range(len(red)):
+		#~ camb = np.loadtxt('/home/david/codes/Paco/data2/0.0eV/CAMB/Pk_cb_z='+str(red[j])+'00.txt')
+		#~ kcamb = camb[:,0]
+		#~ Pcamb = camb[:,1]
+		#~ # padding length 
+		#~ nu=-2; n_pad=len(kcamb)
+		#~ n_pad=int(0.5*len(kcamb))
+		#~ to_do=['all']
+						
+		#~ # initialize the FASTPT class 
+		#~ # including extrapolation to higher and lower k  
+		#~ # time the operation
+
+		#~ fastpt=FPT.FASTPT(kcamb,to_do=to_do,n_pad=n_pad, verbose=True) 
+
+		
+		#~ AB2_1,AB4_1,AB6_1,AB8_1 = fastpt.RSD_ABsum_components(Pcamb,fz,b1 ,C_window=C_window)
+
+		
+		#~ dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV/TNS_coeff/'\
+		#~ 'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(red[j])+'.txt')	
+		#~ with open(dat_file_path, 'w') as fid_file:
+			#~ for index_k in xrange(len(kcamb)):
+				#~ fid_file.write('%.8g %.8g %.8g %.8g %.8g\n' % (kcamb[index_k], AB2_1[index_k],AB4_1[index_k],AB6_1[index_k],AB8_1[index_k]))
+
+	#~ kill
 
 
-	AB2_temp = np.zeros((len(karray),4))
-	AB4_temp = np.zeros((len(karray),4))
-	AB6_temp = np.zeros((len(karray),4))
-	AB8_temp = np.zeros((len(karray),4))
+	AB2_temp = np.zeros((400,4))
+	AB4_temp = np.zeros((400,4))
+	AB6_temp = np.zeros((400,4))
+	AB8_temp = np.zeros((400,4))
+	AB2_temp2 = np.zeros(400)
+	AB4_temp2 = np.zeros(400)
+	AB6_temp2 = np.zeros(400)
+	AB8_temp2 = np.zeros(400)
+	
 	for j in range(len(red)):
 		dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV/TNS_coeff/'\
 		'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(red[j])+'.txt')	
+		kab = np.loadtxt(dat_file_path)[:,0]
+		lkab = len(kab)
 
 		with open(dat_file_path,'r') as f: 
 			line = f.readline()
-			for index_k in range(len(karray)):
+			for index_k in range(lkab):
 				AB2_temp[index_k,j] = float(line.split()[0])
 				AB4_temp[index_k,j] = float(line.split()[1])
 				AB6_temp[index_k,j] = float(line.split()[2])
 				AB8_temp[index_k,j] = float(line.split()[3])
 				line = f.readline()
-	for k in range(len(karray)): # interp on redshift
-		AB2 = np.interp(z,red,AB2_temp[k,:])
-		AB4 = np.interp(z,red,AB4_temp[k,:])
-		AB6 = np.interp(z,red,AB6_temp[k,:])
-		AB8 = np.interp(z,red,AB8_temp[k,:])
+	for k in range(lkab): # interp on redshift
+		AB2_temp2[k] = np.interp(z,red,AB2_temp[k,:])
+		AB4_temp2[k] = np.interp(z,red,AB4_temp[k,:])
+		AB6_temp2[k] = np.interp(z,red,AB6_temp[k,:])
+		AB8_temp2[k] = np.interp(z,red,AB8_temp[k,:])
 		
+	# interp on k array
+	AB2 = np.interp(karray, kab, AB2_temp2) 
+	AB4 = np.interp(karray, kab, AB4_temp2) 
+	AB6 = np.interp(karray, kab, AB6_temp2)
+	AB8 = np.interp(karray, kab, AB8_temp2) 
 		
 		
 		

@@ -24,7 +24,7 @@ kcase = '2'
 # It has to be within the boundaries of the k model above, respectively 0.15, 0.2, 0.4
 kmin = 0.0001
 kmax = 0.2
-kbins = 60
+kbins = 261
 
 # desired redshift must be between [0-2]
 z = 1.5
