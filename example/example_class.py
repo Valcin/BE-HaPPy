@@ -24,7 +24,7 @@ kcase = '2'
 # It has to be within the boundaries of the k model above, respectively 0.15, 0.2, 0.4
 kmin = 0.0001
 kmax = 0.2
-kbins = 100
+kbins = 60
 
 # desired redshift must be between [0-2]
 z = 1.5
@@ -82,7 +82,7 @@ for i,k in enumerate(karray) :
 
 # A summary of your configuration is printed in the terminal
 P1 = ps_calc(coord[0],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, fz, Dz)
-#~ P2 = ps_calc(coord[1],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, fz, Dz)
+P2 = ps_calc(coord[1],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, fz, Dz)
 
 
 ### save results
@@ -93,7 +93,7 @@ P1 = ps_calc(coord[0],kcase, Mnu, mbin, rsd, bias_model, karray, z, fog, Plin, f
 plt.figure()
 plt.plot(karray, Plin, label ='class')
 plt.plot(karray, P1, label ='real space ps '+str(bias_model)+'-'+str(rsd))
-#~ plt.plot(karray, P2, label ='redshift space ps '+str(bias_model)+'-'+str(rsd))
+plt.plot(karray, P2, label ='redshift space ps '+str(bias_model)+'-'+str(rsd))
 plt.axvline(kmax, c='k', label='k max')
 plt.title('The total neutrino mass is '+str(Mnu))
 plt.legend(loc='upper right')

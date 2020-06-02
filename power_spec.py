@@ -4,6 +4,7 @@
 import numpy as np
 import os
 import math
+import numpy as np
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -11,20 +12,31 @@ def red_ps(mbin, bmodel, karray, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 	Pmod_tt, alpha, fog, rsd, red, kcase, sigma_v = []):
 
 
-	dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV/TNS_coeff/'\
-	'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(z)+'.txt')	
-	AB2 = np.zeros((len(karray)))
-	AB4 = np.zeros((len(karray)))
-	AB6 = np.zeros((len(karray)))
-	AB8 = np.zeros((len(karray)))
-	with open(dat_file_path,'r') as f: 
-		line = f.readline()
-		for index_k in range(len(karray)):
-			AB2[index_k] = float(line.split()[0])
-			AB4[index_k] = float(line.split()[1])
-			AB6[index_k] = float(line.split()[2])
-			AB8[index_k] = float(line.split()[3])
+
+	AB2_temp = np.zeros((len(karray),4))
+	AB4_temp = np.zeros((len(karray),4))
+	AB6_temp = np.zeros((len(karray),4))
+	AB8_temp = np.zeros((len(karray),4))
+	for j in range(len(red)):
+		dat_file_path = os.path.join(dir_path, 'coefficients/0.0eV/TNS_coeff/'\
+		'AB_'+str(mbin)+'_'+str(bmodel)+'_z='+str(red[j])+'.txt')	
+
+		with open(dat_file_path,'r') as f: 
 			line = f.readline()
+			for index_k in range(len(karray)):
+				AB2_temp[index_k,j] = float(line.split()[0])
+				AB4_temp[index_k,j] = float(line.split()[1])
+				AB6_temp[index_k,j] = float(line.split()[2])
+				AB8_temp[index_k,j] = float(line.split()[3])
+				line = f.readline()
+	for k in range(len(karray)): # interp on redshift
+		AB2 = np.interp(z,red,AB2_temp[k,:])
+		AB4 = np.interp(z,red,AB4_temp[k,:])
+		AB6 = np.interp(z,red,AB6_temp[k,:])
+		AB8 = np.interp(z,red,AB8_temp[k,:])
+		
+		
+		
 		
 	if fog == 1:
 		if rsd == 1:
@@ -39,12 +51,15 @@ def red_ps(mbin, bmodel, karray, z, fz, Dz, b1, b2, b3, b4, A, B, C, D, E, F, G,
 			mname = 'etns'
 
 		if sigma_v == []:
-			#~ for count,iz in enumerate(red):
-			dat_path = os.path.join(dir_path, 'coefficients/0.0eV'\
-			'/v_disp/case'+str(kcase)+'/vdisp'+mname+'_z='+str(z)+'.txt')
-			with open(dat_path,'r') as f:
-				for i, line in enumerate(f):
-						sigma_v = float(line.split()[mbin])
+			sigma_temp = np.zeros(4)
+			for j in range(len(red)):
+				#~ for count,iz in enumerate(red):
+				dat_path = os.path.join(dir_path, 'coefficients/0.0eV'\
+				'/v_disp/case'+str(kcase)+'/vdisp'+mname+'_z='+str(red[j])+'.txt')
+				with open(dat_path,'r') as f:
+					for i, line in enumerate(f):
+							sigma_temp[j] = float(line.split()[mbin])
+			sigma_v = np.interp(z,red,sigma_temp)
 							
 
 		# compute the multipole expansion coefficients
