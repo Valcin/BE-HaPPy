@@ -25,7 +25,7 @@ kmin = 0.01
 kmax = 0.15
 kbins = 60
 karray = np.logspace(np.log10(kmin), np.log10(kmax), kbins)
-# desired redshift among the list [0.0, 0.5, 1.0, 2.0] for now. Interpolation might be added later
+# desired redshift must be between [0-2]
 z = 0.5
 # choice of neutrino mass between [0.0 - 0.6]eV
 Mnu = 0.0

@@ -26,7 +26,7 @@ kmin = 0.0001
 kmax = 0.2
 kbins = 100
 
-# desired redshift among the list [0.0, 0.5, 1.0, 2.0] for now. Interpolation might be added later
+# desired redshift must be between [0-2]
 z = 1.5
 # choice of neutrino mass between [0.0 - 0.6]eV
 Mnu = 0.0
